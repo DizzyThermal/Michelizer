@@ -14,8 +14,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class GUI extends JFrame implements ActionListener
+public class GUI extends JFrame implements ChangeListener, ActionListener
 {
 	// Initial Settings
 	private static int dimensionCount = 3;
@@ -30,7 +32,8 @@ public class GUI extends JFrame implements ActionListener
 	JPanel spPanel = new JPanel(spGridLayout);
 	JScrollPane sp = new JScrollPane(spPanel);
 
-	// Calculate Button
+	// Button Panel and Buttons
+	JPanel pButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 	JButton calculateButton = new JButton("Calculate");
 	JButton addButton = new JButton("+");
 	JButton removeButton = new JButton("-");
@@ -62,6 +65,7 @@ public class GUI extends JFrame implements ActionListener
 		spinners.add(new JSpinner(new SpinnerNumberModel(4, 1, 100, 1)));
 		
 		spinners.get(0).setValue(dimensionCount);
+		spinners.get(0).addChangeListener(this);
 		spinners.get(1).setValue(clusterCount);
 		
 		for(int i = 0; i < labels.size(); i++)
@@ -74,32 +78,68 @@ public class GUI extends JFrame implements ActionListener
 		add(p);
 		add(sp);
 		
-		JPanel pCalculate = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		pButtons.add(calculateButton);
+		pButtons.add(addButton);
+		pButtons.add(removeButton);
+		calculateButton.addActionListener(this);
+		addButton.addActionListener(this);
+		removeButton.addActionListener(this);
 		
-		pCalculate.add(addButton);
-		pCalculate.add(removeButton);
-		pCalculate.add(calculateButton);
-		add(pCalculate);
+		add(pButtons);
 		
-		updateScrollPanelDimensions(10, dimensionCount);
+		updateScrollPane(5, dimensionCount);
 	}
 	
-	public void updateScrollPanelDimensions(int points, int dimensions)
+	public void updateScrollPane(int points, int dimensions)
 	{
+		System.out.println("Points:" + points);
 		spPanel.removeAll();
-		spGridLayout.setRows(points+1); // Plus Labels
+		spGridLayout.setRows(points+1);
 		spGridLayout.setColumns(dimensions);
 		for(int i = 0; i < dimensions; i++)
-			spPanel.add(new JLabel("D" + (i+1)), JLabel.CENTER);
+		{
+			JLabel jL = new JLabel("D" + (i+1));
+			jL.setHorizontalAlignment(JLabel.CENTER);
+			spPanel.add(jL);
+		}
 			
 		for(int i = 0; i < points; i++)
 			for(int j = 0; j < dimensions; j++)
 				spPanel.add(new JTextField());
+		
+		revalidate();
+		repaint();
 	}
 	
+	public int getGUIPointCount()
+	{
+		return spPanel.getComponentCount() / dimensionCount - 1;
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		if(e.getSource() == spinners.get(0))
+		{
+			int oldDim = dimensionCount;
+			dimensionCount = (Integer)spinners.get(0).getValue();
+			updateScrollPane((spPanel.getComponentCount()/oldDim - 1), dimensionCount);
+		}
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		
+		if(e.getSource() == calculateButton)
+		{
+			
+		}
+		else if(e.getSource() == addButton)
+			updateScrollPane(getGUIPointCount() + 1, dimensionCount);
+		else if(e.getSource() == removeButton)
+		{
+			if(getGUIPointCount() > 1)
+				updateScrollPane(getGUIPointCount() - 1, dimensionCount);
+		}
 	}
 }
