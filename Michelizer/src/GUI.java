@@ -19,6 +19,10 @@ import javax.swing.event.ChangeListener;
 
 public class GUI extends JFrame implements ChangeListener, ActionListener
 {
+	// Static Variables
+	private static int MANHATTEN	= 0;
+	private static int EUCLIDIAN	= 1;
+
 	// Initial Settings
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
@@ -92,7 +96,6 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	public void updateScrollPane(int points, int dimensions)
 	{
-		System.out.println("Points:" + points);
 		spPanel.removeAll();
 		spGridLayout.setRows(points+1);
 		spGridLayout.setColumns(dimensions);
@@ -115,6 +118,23 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	{
 		return spPanel.getComponentCount() / dimensionCount - 1;
 	}
+	
+	public ArrayList<Point> getPoints()
+	{
+		ArrayList<Point> points = new ArrayList<Point>();
+		
+		for(int i = 0; i < getGUIPointCount(); i++)
+		{
+			Point p = new Point();
+			for(int j = 0; j < dimensionCount; j++)
+			{
+				p.addDimension(i*j+1);
+			}
+			points.add(p);
+		}
+		
+		return points;
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e)
@@ -132,7 +152,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	{
 		if(e.getSource() == calculateButton)
 		{
+			Functions funcObj = new Functions();
+			ArrayList<Point> points = getPoints();
+			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?MANHATTEN:EUCLIDIAN;
+			int clusterCount = (Integer)spinners.get(1).getValue();
+
+			boolean result;
+			if(((String)comboBoxes.get(0).getSelectedItem()).equals("MST"))
+				result = funcObj.MST(points, clusterCount, distanceType);
+			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("K-Means"))
+				result = funcObj.K_Means(points, clusterCount, distanceType);
+			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("Z-Score"))
+				result = funcObj.Z_Score(points);
 			
+			//Pop-Up Based on Result
 		}
 		else if(e.getSource() == addButton)
 			updateScrollPane(getGUIPointCount() + 1, dimensionCount);
