@@ -10,6 +10,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -35,6 +36,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	GridLayout spGridLayout = new GridLayout(5, 3);
 	JPanel spPanel = new JPanel(spGridLayout);
 	JScrollPane sp = new JScrollPane(spPanel);
+	JScrollBar vScrollBar;
 
 	// Button Panel and Buttons
 	JPanel pButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -79,6 +81,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		}
 
 		sp.setPreferredSize(new Dimension(285, 200));
+		vScrollBar = sp.getVerticalScrollBar();
 		add(p);
 		add(sp);
 		
@@ -109,9 +112,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		for(int i = 0; i < points; i++)
 			for(int j = 0; j < dimensions; j++)
 				spPanel.add(new JTextField());
-		
+	
 		revalidate();
 		repaint();
+		vScrollBar.setValue(vScrollBar.getMaximum());
 	}
 	
 	public int getGUIPointCount()
