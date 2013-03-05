@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -161,7 +162,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?MANHATTEN:EUCLIDIAN;
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
-			boolean result;
+			boolean result = false;
 			if(((String)comboBoxes.get(0).getSelectedItem()).equals("MST"))
 			{
 				try
@@ -187,7 +188,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 				catch (IOException e1) { e1.printStackTrace(); }
 			}
 			
-			//Pop-Up Based on Result
+			String resultStr = (result)?"Computation Completed Successfully!":"Error: Something went wrong!";
+			JOptionPane.showMessageDialog(this, resultStr);
 		}
 		else if(e.getSource() == addButton)
 			updateScrollPane(getGUIPointCount() + 1, dimensionCount);
