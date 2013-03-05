@@ -132,9 +132,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
-			{
-				p.addDimensionValue(Double.parseDouble(((JTextField)spPanel.getComponent(i*j+1)).getSelectedText()));
-			}
+				p.addDimensionValue(Double.parseDouble(((JTextField)spPanel.getComponent(i*j+dimensionCount)).getText()));
+
 			points.add(p);
 		}
 		
