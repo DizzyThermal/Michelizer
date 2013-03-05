@@ -3,6 +3,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -132,7 +133,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
 			{
-				p.addDimension(i*j+1);
+				p.addDimensionValue(Double.parseDouble(((JTextField)spPanel.getComponent(i*j+1)).getSelectedText()));
 			}
 			points.add(p);
 		}
@@ -163,11 +164,29 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 
 			boolean result;
 			if(((String)comboBoxes.get(0).getSelectedItem()).equals("MST"))
-				result = funcObj.MST(points, clusterCount, distanceType);
+			{
+				try
+				{
+					result = funcObj.MST(points, clusterCount, distanceType);
+				}
+				catch (IOException e1) { e1.printStackTrace(); }
+			}
 			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("K-Means"))
-				result = funcObj.K_Means(points, clusterCount, distanceType);
+			{
+				try
+				{
+					result = funcObj.K_Means(points, clusterCount, distanceType);
+				}
+				catch (IOException e1) { e1.printStackTrace(); }
+			}
 			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("Z-Score"))
-				result = funcObj.Z_Score(points);
+			{
+				try
+				{
+					result = funcObj.Z_Score(points);
+				}
+				catch (IOException e1) { e1.printStackTrace(); }
+			}
 			
 			//Pop-Up Based on Result
 		}
