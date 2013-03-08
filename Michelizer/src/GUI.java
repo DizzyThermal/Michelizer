@@ -22,11 +22,6 @@ import javax.swing.event.ChangeListener;
 
 public class GUI extends JFrame implements ChangeListener, ActionListener
 {
-	// Static Variables
-	private static int MANHATTEN	= 0;
-	private static int EUCLIDIAN	= 1;
-
-	// Initial Settings
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
 
@@ -58,7 +53,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 
 	GUI()
 	{
-		super("Michelizer");
+		super("Michelizer - The All-In-One ECE 460 Solver");
 		FlowLayout fl = new FlowLayout();
 		fl.setAlignment(FlowLayout.LEFT);
 		setLayout(fl);
@@ -96,10 +91,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		
 		add(pButtons);
 		
-		updateScrollPane(5, dimensionCount);
+		updateScrollPane(5, dimensionCount, null);
 	}
 	
-	public void updateScrollPane(int points, int dimensions)
+	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
 	{
 		spPanel.removeAll();
 		spGridLayout.setRows(points+1);
@@ -110,11 +105,19 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			jL.setHorizontalAlignment(JLabel.CENTER);
 			spPanel.add(jL);
 		}
-			
-		for(int i = 0; i < points; i++)
-			for(int j = 0; j < dimensions; j++)
+		
+		int i = 0;
+		if(savedPoints == null)
+		{
+			while(i++ < points*dimensions)
 				spPanel.add(new JTextField());
-	
+		}
+		else
+		{
+			while(i++ < points*dimensions)
+				spPanel.add(new JTextField(savedPoints.get(i++)));
+		}
+
 		revalidate();
 		repaint();
 		vScrollBar.setValue(vScrollBar.getMaximum());
@@ -125,7 +128,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		return spPanel.getComponentCount() / dimensionCount - 1;
 	}
 	
-	public ArrayList<Point> getPoints()
+	public ArrayList<Point> getPointsFromGUI(int dimensionCount)
 	{
 		ArrayList<Point> points = new ArrayList<Point>();
 		
@@ -133,14 +136,30 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
-				p.addDimensionValue(Double.parseDouble(((JTextField)spPanel.getComponent(i*j+dimensionCount)).getText()));
-
+			{
+				String val = ((JTextField)spPanel.getComponent((i*dimensionCount) + j + dimensionCount)).getText();
+				if(!val.equals(""))
+					p.addDimension(Double.parseDouble(val));
+				else
+					p.addDimension(0.0);
+			}
 			points.add(p);
 		}
 		
 		return points;
 	}
 
+	public ArrayList<String> getDimensionsFromPoints(ArrayList<Point> p)
+	{
+		ArrayList<String> pointDimensionValues = new ArrayList<String>();
+		for(int i = 0; i < p.size(); i++)
+		{
+			for(int j = 0; j < dimensionCount; j++)
+				pointDimensionValues.add(Double.toString(p.get(i).getValueAtDimension(j)));
+		}
+		
+		return pointDimensionValues;
+	}
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{
@@ -148,7 +167,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			int oldDim = dimensionCount;
 			dimensionCount = (Integer)spinners.get(0).getValue();
-			updateScrollPane((spPanel.getComponentCount()/oldDim - 1), dimensionCount);
+			updateScrollPane(spPanel.getComponentCount(), dimensionCount, getDimensionsFromPoints(getPointsFromGUI(oldDim)));
 		}
 	}
 
@@ -158,8 +177,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		if(e.getSource() == calculateButton)
 		{
 			Functions funcObj = new Functions();
-			ArrayList<Point> points = getPoints();
-			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?MANHATTEN:EUCLIDIAN;
+			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
+			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDIAN;
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
 			boolean result = false;
@@ -192,11 +211,11 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			JOptionPane.showMessageDialog(this, resultStr);
 		}
 		else if(e.getSource() == addButton)
-			updateScrollPane(getGUIPointCount() + 1, dimensionCount);
+			updateScrollPane(getGUIPointCount() + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
 		else if(e.getSource() == removeButton)
 		{
 			if(getGUIPointCount() > 1)
-				updateScrollPane(getGUIPointCount() - 1, dimensionCount);
+				updateScrollPane(getGUIPointCount() - 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
 		}
 	}
 }

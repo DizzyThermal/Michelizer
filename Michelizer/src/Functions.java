@@ -4,6 +4,10 @@ import java.io.IOException;
 
 public class Functions
 {
+	// Static Variables
+	public static int MANHATTEN	= 0;
+	public static int EUCLIDIAN	= 1;
+
 	public static double manhatten(Point p1, Point p2)
 	{
 		double sum = 0;

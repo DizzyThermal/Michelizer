@@ -3,13 +3,33 @@ import java.util.ArrayList;
 public class Cluster
 {
 	private ArrayList<Point> points = new ArrayList<Point>();
-	private ArrayList<Double> centoid = new ArrayList<Double>();
+	private Point centoid = new Point();
 	private String name;
 	
-	public String getName(){return name;}
-	public void setName(String n){name=n;}
+	// Cluster Name
+	public String getName()					{ return name;						}
+	public void setName(String name)		{ this.name = name;					}
+	
+	// Points in Cluster
+	public ArrayList<Point> getPoints()		{ return points;					}
 	public Point getPointAt(int index)		{ return points.get(index); 		}
 	public Point removePointAt(int index)	{ return points.remove(index);		}
 	public boolean removeAllPoints()		{ return points.removeAll(points);	}
-	public void addPoint(Point p){points.add(p);}
+	public void addPoint(Point point)		{ points.add(point);				}
+	
+	// Centoid
+	public Point getCentoid()				{ return centoid;					}
+	public void calculateCentoid()
+	{
+		Point centoid = new Point();
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+		{
+			Double sum = 0.0;
+			for(Point p : points)
+				sum += p.getValueAtDimension(i);
+
+			centoid.addDimension(sum/points.size());
+		}
+		this.centoid = centoid;
+	}
 }
