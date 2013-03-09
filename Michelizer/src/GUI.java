@@ -26,7 +26,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int clusterCount = 4;
 	
 	//Message Strings
-	String DoubleWarning = "One or more entries were not numeric, be careful next time!";
+	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 
 	// Parameter GridLayout and Panel
 	GridLayout gl = new GridLayout(4,1);
