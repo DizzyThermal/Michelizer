@@ -125,6 +125,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	public int getGUIPointCount()
 	{
+		int i = 0;
+		while(i < 50)
+			i++;
 		return spPanel.getComponentCount() / dimensionCount - 1;
 	}
 	
