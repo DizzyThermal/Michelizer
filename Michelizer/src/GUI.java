@@ -24,6 +24,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 {
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
+	
+	//Message Strings
+	String DoubleWarning = "One or more entries were not numeric, be careful next time!";
 
 	// Parameter GridLayout and Panel
 	GridLayout gl = new GridLayout(4,1);
@@ -105,17 +108,28 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			jL.setHorizontalAlignment(JLabel.CENTER);
 			spPanel.add(jL);
 		}
-		
-		int i = 0;
+
 		if(savedPoints == null)
 		{
-			while(i++ < points*dimensions)
-				spPanel.add(new JTextField());
+			for(int i = 0; i < points; i++)
+			{
+				for(int j = 0; j < dimensions; j++)
+				{
+					spPanel.add(new JTextField(""));
+				}
+			}
 		}
 		else
 		{
-			while(i++ < points*dimensions)
-				spPanel.add(new JTextField(savedPoints.get(i++)));
+			int index = 0;
+			for(int i = 0; i < points; i++)
+			{
+				for(int j = 0; j < dimensions; j++)
+				{
+					try { spPanel.add(new JTextField(savedPoints.get(index++))); }
+					catch (Exception e) { spPanel.add(new JTextField("")); }
+				}
+			}
 		}
 
 		revalidate();
@@ -123,29 +137,44 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		vScrollBar.setValue(vScrollBar.getMaximum());
 	}
 	
-	public int getGUIPointCount()
+	public int getGUIPointCount(int dimToUse)
 	{
-		return spPanel.getComponentCount() / dimensionCount - 1;
+		return spPanel.getComponentCount() / dimToUse - 1;
 	}
 	
 	public ArrayList<Point> getPointsFromGUI(int dimensionCount)
 	{
 		ArrayList<Point> points = new ArrayList<Point>();
-		
-		for(int i = 0; i < getGUIPointCount(); i++)
+		boolean someValuesReset = false;
+
+		for(int i = 1; i <= getGUIPointCount(dimensionCount); i++) // Line to Check
 		{
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
 			{
-				String val = ((JTextField)spPanel.getComponent((i*dimensionCount) + j + dimensionCount)).getText();
-				if(!val.equals(""))
-					p.addDimension(Double.parseDouble(val));
-				else
-					p.addDimension(0.0);
+				String val = ((JTextField)spPanel.getComponent((i*dimensionCount) + j)).getText();
+				Double dValue;
+				try
+				{
+					// See if the value can be parse as a Double
+ 					dValue = Double.parseDouble(val);
+				}
+				catch (Exception e)
+				{
+					// If not reset and warn the user to be careful
+					if(!val.equals(""))
+						someValuesReset = true;
+
+					dValue = 0.0;
+				}
+				p.addDimension(dValue);
 			}
 			points.add(p);
 		}
 		
+		if(someValuesReset)
+			JOptionPane.showMessageDialog(this, DoubleWarning);
+
 		return points;
 	}
 
@@ -155,7 +184,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		for(int i = 0; i < p.size(); i++)
 		{
 			for(int j = 0; j < dimensionCount; j++)
-				pointDimensionValues.add(Double.toString(p.get(i).getValueAtDimension(j)));
+			{
+				try { pointDimensionValues.add(Double.toString(p.get(i).getValueAtDimension(j))); }
+				catch (Exception e) { pointDimensionValues.add("0.0"); }
+			}
 		}
 		
 		return pointDimensionValues;
@@ -167,7 +199,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			int oldDim = dimensionCount;
 			dimensionCount = (Integer)spinners.get(0).getValue();
-			updateScrollPane(spPanel.getComponentCount(), dimensionCount, getDimensionsFromPoints(getPointsFromGUI(oldDim)));
+			updateScrollPane(getGUIPointCount(oldDim), dimensionCount, getDimensionsFromPoints(getPointsFromGUI(oldDim)));
 		}
 	}
 
@@ -211,11 +243,11 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			JOptionPane.showMessageDialog(this, resultStr);
 		}
 		else if(e.getSource() == addButton)
-			updateScrollPane(getGUIPointCount() + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
+			updateScrollPane(getGUIPointCount(dimensionCount) + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
 		else if(e.getSource() == removeButton)
 		{
-			if(getGUIPointCount() > 1)
-				updateScrollPane(getGUIPointCount() - 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
+			if(getGUIPointCount(dimensionCount) > 1)
+				updateScrollPane(getGUIPointCount(dimensionCount) - 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
 		}
 	}
 }
