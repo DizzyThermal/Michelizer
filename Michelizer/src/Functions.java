@@ -79,7 +79,7 @@ public class Functions
                 	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
 
                     file.append(distance + ",");
-                    if (i != j && distance < min)
+                    if ((i != j) && (distance < min))
                     {
                         min = distance;
                         index1 = i;
@@ -88,35 +88,29 @@ public class Functions
                 }
                 file.append("\n");
             }
-            file.append("\n\n");
-            
-            //the index of the two clusters that are the closest to each other is held in index1 & index2;
+            file.append("\n");
+
             for (int i = 0; i < clusters.get(index2).getNumberOfPoints(); i++)
                 clusters.get(index1).addPoint(clusters.get(index2).getPointAt(i));
+
             clusters.get(index1).setName("[" + clusters.get(index1).getName() + "|" + clusters.get(index2).getName() + "]");
             clusters.remove(index2);
 
         }
 
-        //display headers
         for (int i = 0; i < clusters.size(); i++)
-        {
             file.append("," + clusters.get(i).getName());
-        }
+
         file.append("\n");
 
         for (int i = 0; i < clusters.size(); i++)
         {
             file.append(clusters.get(i).getName() + ",");
             for (int j = 0; j < clusters.size(); j++)
-            {
-            	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
-                file.append(distance + ",");
-            }
+                file.append(getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+
             file.append("\n");
         }
-        
-		
 		
 		file.close();
 		return true;
@@ -133,28 +127,21 @@ public class Functions
         
         ArrayList<Cluster> C2 = new ArrayList<Cluster>();
         ArrayList<Cluster> C2old = new ArrayList<Cluster>();
-        //initilize the cluster matrix to the number of the desired clusters
-        //this distributes all the points out like cards.
+
         for (int i = 0; i < numberOfClusters; i++)
         {
-            Cluster tempClust = new Cluster();
-            Cluster tempClust2 = new Cluster();
-            tempClust2.setName(tempClust2.getName() + Integer.toString(i));
-            tempClust2.addPoint(points.get(i));
-            tempClust.setName(tempClust2.getName() + Integer.toString(i));
-            tempClust.addPoint(points.get(i));
-            C2.add(tempClust);
-            C2old.add(tempClust2);
-
-
+        	C2.add(new Cluster(points.get(i), "C" + (i+1)));
+        	C2old.add(new Cluster(points.get(i), "C" + (i+1)));
         }
 
         while (true)
         {
-        	double distance=0.0;
+        	double distance = 0.0;
+
             ArrayList<Integer> index1 = new ArrayList<Integer>();
             ArrayList<Integer> index2 = new ArrayList<Integer>();
             ArrayList<Double> mins = new ArrayList<Double>();
+
             for (int i = 0; i < clusters.size(); i++)
             {
 
@@ -175,73 +162,65 @@ public class Functions
                 mins.add(min);
                 index1.add(index11);
                 index2.add(index22);
-
             }
 
-            //print out
+            // Print Out
             for (int i = 0; i < clusters.size(); i++)
-            {
                 file.append(" ," + clusters.get(i).getName());
-            }
+
             file.append("\n");
 
             for (int i = 0; i < C2.size(); i++)
             {
                 file.append(C2.get(i).getName() + ",");
-                for (int j = 0; j < clusters.size(); j++)
-                {
-                	distance = getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);      	                   
-                    file.append(distance + ",");
-                }
+                for (int j = 0; j < clusters.size(); j++)      	                   
+                    file.append(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+
                 file.append("\n");
             }
-            file.append("\n\n");
+            file.append("\n");
 
             // Wipe out all points in each cluster
             for (int i = 0; i < C2.size(); i++)
             {
                 C2old.get(i).removeAllPoints();
-                C2old.get(i).setName( C2.get(i).getName());
+                C2old.get(i).setName(C2.get(i).getName());
                 for (int k = 0; k < C2.get(i).getNumberOfPoints(); k++)
-                {
                     C2old.get(i).addPoint(C2.get(i).getPointAt(k));
-                }
 
                 C2.get(i).removeAllPoints();
                 C2.get(i).setName("");
             }
-            //re-assign points to correct clusters
+
+            // Re-Assign points to correct clusters
             for (int i = 0; i < mins.size(); i++)
             {
                 C2.get(index2.get(i)).addPoint(clusters.get(index1.get(i)).getPointAt(0));
                 C2.get(index2.get(i)).setName(C2.get(index2.get(i)).getName() + clusters.get(index1.get(i)).getName() + " | ");
             }
+
             int counter = 0;
             for (int i = 0; i < C2.size(); i++)
             {
                 if (C2old.get(i) == C2.get(i))
-                {
                     counter++;
-                }
             }
-            //check if we are finished
+
+            // Check if we are finished
             if (counter == C2.size())
             {
-                //print out
+                // Print out
                 for (int i = 0; i < clusters.size(); i++)
-                {
                     file.append(" ," + clusters.get(i).getName());
-                }
+
                 file.append("\n");
 
                 for (int i = 0; i < C2.size(); i++)
                 {
                     file.append(C2.get(i).getName() + ",");
                     for (int j = 0; j < clusters.size(); j++)
-                    {
-                    	distance = getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);                 
-                        file.append(distance + ",");
-                    }
+                        file.append(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+
                     file.append("\n");
                 }
                 file.append("\n");
@@ -251,14 +230,14 @@ public class Functions
                 	file.append(C2.get(i).getName());
                 	for(int j=0;j<C2.get(i).getPointAt(0).getDimensionSize();j++)
                     	file.append(",CenterD"+(i+1)+"= " + C2.get(i).getCentoid().getValueAtDimension(j));
+                	
                     file.append("\n");
                 }
+
                 file.append("\n");
                 break;
             }
-
         }
-        
         
 		file.close();
 		return false;

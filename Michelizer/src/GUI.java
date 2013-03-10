@@ -22,6 +22,8 @@ import javax.swing.event.ChangeListener;
 
 public class GUI extends JFrame implements ChangeListener, ActionListener
 {
+	private static final long serialVersionUID = 1L;
+
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
 	
@@ -50,7 +52,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 
 	// Labels and Fields
 	ArrayList<JLabel> labels = new ArrayList<JLabel>();
-	ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
+	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
 	ArrayList<JSpinner> spinners = new ArrayList<JSpinner>();
 
 	// Label Strings
@@ -68,8 +70,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		for(int i = 0; i < labelStrings.length; i++)
 			labels.add(new JLabel(labelStrings[i] + ":"));
 		
-		comboBoxes.add(new JComboBox(algorithmStrings));
-		comboBoxes.add(new JComboBox(distanceStrings));
+		comboBoxes.add(new JComboBox<String>(algorithmStrings));
+		comboBoxes.add(new JComboBox<String>(distanceStrings));
 		
 		spinners.add(new JSpinner(new SpinnerNumberModel(3, 1, 10, 1)));
 		spinners.add(new JSpinner(new SpinnerNumberModel(4, 1, 100, 1)));
