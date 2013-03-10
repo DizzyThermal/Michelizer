@@ -52,7 +52,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	// Label Strings
 	String[] labelStrings 		= {"Algorithm", "Distance Type", "Dimensions", "Clusters"};
 	String[] algorithmStrings	= {"MST", "K-Means", "Z-Score"};
-	String[] distanceStrings	= {"Manhatten", "Euclidian"};
+	String[] distanceStrings	= {"Manhatten", "Euclidean"};
 
 	GUI()
 	{
@@ -115,7 +115,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			{
 				for(int j = 0; j < dimensions; j++)
 				{
-					spPanel.add(new JTextField(""));
+					spPanel.add(new JTextField("0.0"));
 				}
 			}
 		}
@@ -127,7 +127,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 				for(int j = 0; j < dimensions; j++)
 				{
 					try { spPanel.add(new JTextField(savedPoints.get(index++))); }
-					catch (Exception e) { spPanel.add(new JTextField("")); }
+					catch (Exception e) { spPanel.add(new JTextField("0.0")); }
 				}
 			}
 		}
@@ -210,7 +210,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			Functions funcObj = new Functions();
 			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
-			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDIAN;
+			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
 			boolean result = false;

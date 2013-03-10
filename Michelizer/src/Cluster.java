@@ -16,6 +16,7 @@ public class Cluster
 	public Point removePointAt(int index)	{ return points.remove(index);		}
 	public boolean removeAllPoints()		{ return points.removeAll(points);	}
 	public void addPoint(Point point)		{ points.add(point);				}
+	public int getNumberOfPoints()				{ return points.size();				}
 	
 	// Centoid
 	public Point getCentoid()				{ return centoid;					}
