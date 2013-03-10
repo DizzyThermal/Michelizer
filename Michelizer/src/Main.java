@@ -7,7 +7,7 @@ public class Main extends JFrame
 		GUI go = new GUI();
 
 		go.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		go.setSize(300, 380);
+		go.setSize(300, 390);
 		go.setResizable(false);
 		go.setVisible(true);
 	}

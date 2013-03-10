@@ -5,69 +5,79 @@ import java.io.IOException;
 public class Functions
 {
 	// Static Variables
-	public static int MANHATTEN	= 0;
-	public static int EUCLIDEAN	= 1;
+	public static final int MANHATTEN		= 0;
+	public static final int EUCLIDEAN		= 1;
+	
+	public static final int MST				= 0;
+	public static final int KMEANS			= 1;
+	public static final int ZSCORE			= 2;
 
-	public static double manhatten(Point p1, Point p2)
+	public static double getDistance(Point p1, Point p2, int distanceType)
 	{
-		double sum = 0;
-		for(int i = 0; i < p1.getDimensionSize(); i++)
-			sum += Math.abs(p2.getValueAtDimension(i) - p1.getValueAtDimension(i));
-		
-		return sum;
+		double sum = 0.0;
+
+		switch(distanceType)
+		{
+			case MANHATTEN:
+				for(int i = 0; i < p1.getDimensionSize(); i++)
+					sum += Math.abs(p2.getValueAtDimension(i) - p1.getValueAtDimension(i));
+				
+				return sum;
+				
+			case EUCLIDEAN:
+				for(int i = 0; i < p1.getDimensionSize(); i++)
+					sum += Math.pow(p2.getValueAtDimension(i) - p1.getValueAtDimension(i), 2);
+				
+				return Math.sqrt(sum);
+				
+			default:
+				return -1.0;
+		}
 	}
-
-	public static double euclidean(Point p1, Point p2)
+	
+	public static String getOperatingSystemPath()
 	{
-		double sum = 0;
-		for(int i = 0; i < p1.getDimensionSize(); i++)
-			sum += Math.pow(p2.getValueAtDimension(i) - p1.getValueAtDimension(i), 2);
-		
-		return Math.sqrt(sum);
+		if (System.getProperty("os.name").equals("Windows"))
+		{
+			if(Double.parseDouble(System.getProperty("os.version")) > 5.1)
+				return "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\Result.csv";
+			else
+				return "C:\\Documents and Settings\\" + System.getProperty("user.name") + "\\Desktop\\Result.csv";
+		}
+		else if (System.getProperty("os.name").equals("Linux"))
+			return "/home/" + System.getProperty("user.name") + "/Desktop/Results.csv";
+
+		return null;
 	}
-
-	public static boolean MST(ArrayList<Point> pValues, int NumClusters,int dtype) throws IOException
+	
+	public static boolean MST(ArrayList<Point> points, int numOfClusters, int distanceType) throws IOException
 	{
+		FileWriter file = new FileWriter(getOperatingSystemPath());
+		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
-		String fileName = "results.csv";
-		FileWriter file = new FileWriter(fileName);
-		ArrayList<Cluster> C = new ArrayList<Cluster>();
-		
-		//initilize the cluster matrix to the size of the data
-        for (int i = 0; i < pValues.size(); i++)
-        {
-            Cluster tempClust = new Cluster();
-            tempClust.setName( Integer.toString(i));
-            tempClust.addPoint(pValues.get(i));
-            C.add(tempClust);
-        }
+		// Make Every Point a Cluster
+        for (int i = 0; i < points.size(); i++)
+            clusters.add(new Cluster(points.get(i), "C" + (i+1)));
         
-        //start of actual algorithm
-        Double distance=0.0;
-        while (C.size() > NumClusters)
+        // MST Algorithm (Loop until number of clusters remaining equals desired number of clusters)
+        Double distance = 0.0;
+        while (clusters.size() > numOfClusters)
         {
-            //Display distance matrix
+        	for(Cluster c: clusters)
+        		file.append("," + c.getName());
 
-            //display headers
-            for (int i = 0; i < C.size(); i++)
-            {
-                file.append(" ," + C.get(i).getName());
-            }
-            file.append("\n");
+        	file.append("\n");
             
             int index1 = 0;
             int index2 = 0;
             double min = Double.MAX_VALUE;
-            for (int i = 0; i < C.size(); i++)
+            for (int i = 0; i < clusters.size(); i++)
             {
-                file.append(C.get(i).getName() + ",");
-                for (int j = 0; j < C.size(); j++)
+                file.append(clusters.get(i).getName() + ",");
+                for (int j = 0; j < clusters.size(); j++)
                 {
-                	if(dtype==0)
-                		distance = manhatten(C.get(i).getCentoid() ,C.get(j).getCentoid());
-                	else
-                		distance = euclidean(C.get(i).getCentoid(), C.get(j).getCentoid());
-                	
+                	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
+
                     file.append(distance + ",");
                     if (i != j && distance < min)
                     {
@@ -78,35 +88,29 @@ public class Functions
                 }
                 file.append("\n");
             }
-            file.append("\n");
-            file.append("\n");
+            file.append("\n\n");
+            
             //the index of the two clusters that are the closest to each other is held in index1 & index2;
-            for (int i = 0; i < C.get(index2).getNumberOfPoints(); i++)
-                C.get(index1).addPoint(C.get(index2).getPointAt(i));
-            C.get(index1).setName(C.get(index1).getName() + " | " + C.get(index2).getName());
-            C.remove(index2);
+            for (int i = 0; i < clusters.get(index2).getNumberOfPoints(); i++)
+                clusters.get(index1).addPoint(clusters.get(index2).getPointAt(i));
+            clusters.get(index1).setName("[" + clusters.get(index1).getName() + "|" + clusters.get(index2).getName() + "]");
+            clusters.remove(index2);
 
         }
 
         //display headers
-        for (int i = 0; i < C.size(); i++)
+        for (int i = 0; i < clusters.size(); i++)
         {
-            file.append(" ," + C.get(i).getName());
+            file.append("," + clusters.get(i).getName());
         }
         file.append("\n");
 
-        for (int i = 0; i < C.size(); i++)
+        for (int i = 0; i < clusters.size(); i++)
         {
-            file.append(C.get(i).getName() + ",");
-            for (int j = 0; j < C.size(); j++)
+            file.append(clusters.get(i).getName() + ",");
+            for (int j = 0; j < clusters.size(); j++)
             {
-            	
-            	if(dtype==0)
-            		distance = manhatten(C.get(i).getCentoid(), C.get(j).getCentoid());
-            	else
-            		distance = euclidean(C.get(i).getCentoid(),C.get(j).getCentoid());
-            	            	
-               
+            	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
                 file.append(distance + ",");
             }
             file.append("\n");
@@ -118,36 +122,27 @@ public class Functions
 		return true;
 	}
 
-	public static boolean K_Means(ArrayList<Point> pValues, int NumClusters,int dtype)throws IOException
+	public static boolean K_Means(ArrayList<Point> points, int numberOfClusters, int distanceType) throws IOException
 	{
-		String fileName = "results.csv";
-		FileWriter file = new FileWriter(fileName);
-		ArrayList<Cluster> C = new ArrayList<Cluster>();
+		FileWriter file = new FileWriter(getOperatingSystemPath());
+		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
-		//initilize the cluster matrix to the size of the data
-        for (int i = 0; i < pValues.size(); i++)
-        {
-            Cluster tempClust = new Cluster();
-            tempClust.setName( Integer.toString(i));
-            tempClust.addPoint(pValues.get(i));
-            C.add(tempClust);
-        }
-        
-        
-        
+		// Make Every Point a Cluster
+        for (int i = 0; i < points.size(); i++)
+        	clusters.add(new Cluster(points.get(i), "C" + (i+1)));
         
         ArrayList<Cluster> C2 = new ArrayList<Cluster>();
         ArrayList<Cluster> C2old = new ArrayList<Cluster>();
         //initilize the cluster matrix to the number of the desired clusters
         //this distributes all the points out like cards.
-        for (int i = 0; i < NumClusters; i++)
+        for (int i = 0; i < numberOfClusters; i++)
         {
             Cluster tempClust = new Cluster();
             Cluster tempClust2 = new Cluster();
             tempClust2.setName(tempClust2.getName() + Integer.toString(i));
-            tempClust2.addPoint(pValues.get(i));
+            tempClust2.addPoint(points.get(i));
             tempClust.setName(tempClust2.getName() + Integer.toString(i));
-            tempClust.addPoint(pValues.get(i));
+            tempClust.addPoint(points.get(i));
             C2.add(tempClust);
             C2old.add(tempClust2);
 
@@ -160,7 +155,7 @@ public class Functions
             ArrayList<Integer> index1 = new ArrayList<Integer>();
             ArrayList<Integer> index2 = new ArrayList<Integer>();
             ArrayList<Double> mins = new ArrayList<Double>();
-            for (int i = 0; i < C.size(); i++)
+            for (int i = 0; i < clusters.size(); i++)
             {
 
                 double min = Double.MAX_VALUE;
@@ -168,10 +163,8 @@ public class Functions
                 int index22 = 0;
                 for (int j = 0; j < C2.size(); j++)
                 {
-                	if(dtype==0)
-                		distance = manhatten(C.get(i).getCentoid(), (C2.get(j).getCentoid()));
-                	else
-                		distance = euclidean(C.get(i).getCentoid() ,(C2.get(j).getCentoid()));
+                	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
+
                     if (distance <= min)
                     {
                         min = distance;
@@ -186,31 +179,25 @@ public class Functions
             }
 
             //print out
-            for (int i = 0; i < C.size(); i++)
+            for (int i = 0; i < clusters.size(); i++)
             {
-                file.append(" ," + C.get(i).getName());
+                file.append(" ," + clusters.get(i).getName());
             }
             file.append("\n");
 
             for (int i = 0; i < C2.size(); i++)
             {
                 file.append(C2.get(i).getName() + ",");
-                for (int j = 0; j < C.size(); j++)
+                for (int j = 0; j < clusters.size(); j++)
                 {
-                	
-                	if(dtype==0)
-                		distance = manhatten(C2.get(i).getCentoid(), (C.get(j).getCentoid()));
-                	else
-                		distance = euclidean(C2.get(i).getCentoid(), (C.get(j).getCentoid()));
-                	                   
+                	distance = getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);      	                   
                     file.append(distance + ",");
                 }
                 file.append("\n");
             }
-            file.append("\n");
-            file.append("\n");
-            //whipe out all points in each cluster
+            file.append("\n\n");
 
+            // Wipe out all points in each cluster
             for (int i = 0; i < C2.size(); i++)
             {
                 C2old.get(i).removeAllPoints();
@@ -226,8 +213,8 @@ public class Functions
             //re-assign points to correct clusters
             for (int i = 0; i < mins.size(); i++)
             {
-                C2.get(index2.get(i)).addPoint(C.get(index1.get(i)).getPointAt(0));
-                C2.get(index2.get(i)).setName(C2.get(index2.get(i)).getName() + C.get(index1.get(i)).getName() + " | ");
+                C2.get(index2.get(i)).addPoint(clusters.get(index1.get(i)).getPointAt(0));
+                C2.get(index2.get(i)).setName(C2.get(index2.get(i)).getName() + clusters.get(index1.get(i)).getName() + " | ");
             }
             int counter = 0;
             for (int i = 0; i < C2.size(); i++)
@@ -241,29 +228,24 @@ public class Functions
             if (counter == C2.size())
             {
                 //print out
-                for (int i = 0; i < C.size(); i++)
+                for (int i = 0; i < clusters.size(); i++)
                 {
-                    file.append(" ," + C.get(i).getName());
+                    file.append(" ," + clusters.get(i).getName());
                 }
                 file.append("\n");
 
                 for (int i = 0; i < C2.size(); i++)
                 {
                     file.append(C2.get(i).getName() + ",");
-                    for (int j = 0; j < C.size(); j++)
+                    for (int j = 0; j < clusters.size(); j++)
                     {
-                    	
-                    	if(dtype==0)
-                    		distance = manhatten(C2.get(i).getCentoid(), (C.get(j).getCentoid()));
-                    	else
-                    		distance = euclidean(C2.get(i).getCentoid(), (C.get(j).getCentoid()));
-                    	
-                 
+                    	distance = getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);                 
                         file.append(distance + ",");
                     }
                     file.append("\n");
                 }
                 file.append("\n");
+
                 for (int i = 0; i < C2.size(); i++)
                 {
                 	file.append(C2.get(i).getName());
@@ -282,28 +264,17 @@ public class Functions
 		return false;
 	}
 	
-	public static boolean Z_Score(ArrayList<Point> pValues)throws IOException
+	public static boolean Z_Score(ArrayList<Point> points)throws IOException
 	{
-		//variables
+		FileWriter file = new FileWriter(getOperatingSystemPath());
+		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
-		String fileName = "results.csv";
-		FileWriter file = new FileWriter(fileName);
-		ArrayList<Cluster> C = new ArrayList<Cluster>();
-		
-		//initilize the cluster matrix to the size of the data
-        for (int i = 0; i < pValues.size(); i++)
-        {
-            Cluster tempClust = new Cluster();
-            tempClust.setName( Integer.toString(i));
-            tempClust.addPoint(pValues.get(i));
-            C.add(tempClust);
-        }
+		// Make Every Point a Cluster
+        for (int i = 0; i < points.size(); i++)
+        	clusters.add(new Cluster(points.get(i), "C" + (i+1)));
         
-        //start of actual algorithm
-        
-        
-        
-        
+        //Algorithm - Needs to be added
+
         file.close();
 		return false;
 	}

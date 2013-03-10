@@ -26,6 +26,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int clusterCount = 4;
 	
 	//Message Strings
+	String successfulComputation = "Computation Completed Successfully!";
+	String errornousComputation = "Error: Something Went Wrong!";
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 
 	// Parameter GridLayout and Panel
@@ -39,8 +41,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JScrollBar vScrollBar;
 
 	// Button Panel and Buttons
-	JPanel pButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	JPanel pButtons1 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	JPanel pButtons2 = new JPanel();
 	JButton calculateButton = new JButton("Calculate");
+	JButton clearButton = new JButton("Clear Fields");
 	JButton addButton = new JButton("+");
 	JButton removeButton = new JButton("-");
 
@@ -85,14 +89,17 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		add(p);
 		add(sp);
 		
-		pButtons.add(calculateButton);
-		pButtons.add(addButton);
-		pButtons.add(removeButton);
-		calculateButton.addActionListener(this);
+		pButtons1.add(addButton);
+		pButtons1.add(removeButton);
+		pButtons2.add(calculateButton);
+		pButtons2.add(clearButton);
 		addButton.addActionListener(this);
 		removeButton.addActionListener(this);
+		calculateButton.addActionListener(this);
+		clearButton.addActionListener(this);
 		
-		add(pButtons);
+		add(pButtons1);
+		add(pButtons2);
 		
 		updateScrollPane(5, dimensionCount, null);
 	}
@@ -208,39 +215,28 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	{
 		if(e.getSource() == calculateButton)
 		{
-			Functions funcObj = new Functions();
 			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
 			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
 			boolean result = false;
-			if(((String)comboBoxes.get(0).getSelectedItem()).equals("MST"))
+			switch(comboBoxes.get(0).getSelectedIndex())
 			{
-				try
-				{
-					result = funcObj.MST(points, clusterCount, distanceType);
-				}
-				catch (IOException e1) { e1.printStackTrace(); }
-			}
-			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("K-Means"))
-			{
-				try
-				{
-					result = funcObj.K_Means(points, clusterCount, distanceType);
-				}
-				catch (IOException e1) { e1.printStackTrace(); }
-			}
-			else if(((String)comboBoxes.get(0).getSelectedItem()).equals("Z-Score"))
-			{
-				try
-				{
-					result = funcObj.Z_Score(points);
-				}
-				catch (IOException e1) { e1.printStackTrace(); }
+				case Functions.MST:
+					try { result = Functions.MST(points, clusterCount, distanceType); }
+					catch (IOException exception) { exception.printStackTrace(); }
+					break;
+				case Functions.KMEANS:
+					try { result = Functions.K_Means(points, clusterCount, distanceType); }
+					catch (IOException exception) { exception.printStackTrace(); }
+					break;
+				case Functions.ZSCORE:
+					try { result = Functions.Z_Score(points); }
+					catch (IOException exception) { exception.printStackTrace(); }
+					break;
 			}
 			
-			String resultStr = (result)?"Computation Completed Successfully!":"Error: Something went wrong!";
-			JOptionPane.showMessageDialog(this, resultStr);
+			JOptionPane.showMessageDialog(this, (result)?successfulComputation:errornousComputation);
 		}
 		else if(e.getSource() == addButton)
 			updateScrollPane(getGUIPointCount(dimensionCount) + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
@@ -248,6 +244,11 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			if(getGUIPointCount(dimensionCount) > 1)
 				updateScrollPane(getGUIPointCount(dimensionCount) - 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
+		}
+		else if(e.getSource() == clearButton)
+		{
+			for(int i = dimensionCount; i < getGUIPointCount(dimensionCount)*dimensionCount+dimensionCount; i++)
+				((JTextField)spPanel.getComponent(i)).setText("");
 		}
 	}
 }

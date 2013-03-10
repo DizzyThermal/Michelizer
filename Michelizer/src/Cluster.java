@@ -2,9 +2,24 @@ import java.util.ArrayList;
 
 public class Cluster
 {
-	private ArrayList<Point> points = new ArrayList<Point>();
-	private Point centoid = new Point();
+	private ArrayList<Point> points;
+	private Point centoid;
 	private String name;
+	
+	public Cluster()
+	{
+		points = new ArrayList<Point>();
+		centoid = new Point();
+		name = null;
+	}
+	
+	public Cluster(Point point, String name)
+	{
+		points = new ArrayList<Point>();
+		points.add(point);
+		centoid = point;
+		this.name = name;
+	}
 	
 	// Cluster Name
 	public String getName()					{ return name;						}
