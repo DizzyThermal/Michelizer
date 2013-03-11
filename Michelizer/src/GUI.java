@@ -29,8 +29,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int clusterCount = 4;
 	
 	// Message Strings
-	String successfulComputation = "Computation Completed Successfully!";
-	String errornousComputation = "Error: Something Went Wrong!";
+	String clusteringSuccessfulComputation = "Computation Completed Successfully!";
+	String clusteringErrornousComputation = "Error: Something Went Wrong!";
+	String serviceDemandInputError = "Error: All values must be numeric!";
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 
 	// Overall Tabbed Pane
@@ -39,7 +40,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	
 	// GUI Panels
-	JPanel p_serviceDemand = new JPanel(new GridLayout(8,1));
+	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
 	
 	// Point Field
@@ -47,7 +48,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JScrollPane pointScrollPane = new JScrollPane(pointPanel);
 	
 	// Service Demand Output
-	JPanel serviceDemandOutputPanel = new JPanel(new GridLayout(8,2));
+	JPanel serviceDemandOutputPanel = new JPanel(new GridLayout(8,1));
 	JScrollPane serviceDemandOutputPane = new JScrollPane(serviceDemandOutputPanel);
 
 	// Clustering Button Panel and Buttons
@@ -57,6 +58,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JButton clusteringClearButton = new JButton("Clear Fields");
 	JButton clusteringAddButton = new JButton("+");
 	JButton clusteringRemoveButton = new JButton("-");
+	
+	// Service Demand Button Panel and Buttons
+	JButton serviceDemandCalculateButton = new JButton("Calculate");
+	JButton serviceDemandClearButton = new JButton("Clear");
 
 	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
@@ -71,10 +76,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	String[] serviceDemandInputLabelStrings 	= {	"Lambda", "Random %",
 													"Block Size (Bytes)", "Run Length",
 													"RPM", "Seek-Random (ms)",
-													"Transfer Rate (MB/s", "Controller Time (ms)"	};
-	String[] serviceDemandOutputLabelStrings	= {	"Service Demand Random", "Utilization",
-													"Random Seek Time", "Service Demand Sequential",
-													"Service Demand"								};
+													"Transfer Rate (MB/s", "Controller Time (ms)",
+													"Iterations"									};
 
 	GUI()
 	{
@@ -98,13 +101,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			JLabel jL = new JLabel();
 			jL.setFont(new Font("Arial", Font.PLAIN, 12));
-			jL.setText(serviceDemandInputLabelStrings[i]);
+			jL.setText(serviceDemandInputLabelStrings[i] + ":");
 			p_serviceDemand.add(jL);
 			p_serviceDemand.add(new JTextField());
 		}
 		
 		p_serviceDemand.setPreferredSize(new Dimension(275, 200));
+		serviceDemandCalculateButton.addActionListener(this);
+		serviceDemandClearButton.addActionListener(this);
+		
 		pane_serviceDemand.add(p_serviceDemand);
+		pane_serviceDemand.add(serviceDemandCalculateButton);
+		pane_serviceDemand.add(serviceDemandClearButton);
+		pane_serviceDemand.add(serviceDemandOutputPane);
+		serviceDemandOutputPane.setPreferredSize(new Dimension(285, 150));
 	}
 	
 	public void createPane2()
@@ -146,7 +156,6 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
 	{
-		
 		pointPanel.removeAll();
 		((GridLayout)pointPanel.getLayout()).setRows(points+1);
 		((GridLayout)pointPanel.getLayout()).setColumns(dimensions);
@@ -200,7 +209,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
 			{
-				String val = ((JTextField)pointPanel.getComponent((i*dimensionCount) + j)).getText();
+				String val = ((JTextField)pointPanel.getComponent((i*dimensionCount) + j)).getText().trim();
 				Double dValue;
 				try
 				{
@@ -254,7 +263,46 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if(e.getSource() == clusteringCalculateButton)
+		if(e.getSource() == serviceDemandCalculateButton)
+		{
+			ArrayList<Double> parameters = new ArrayList<Double>();
+			boolean allValid = true;
+			for(int i = 0; i < p_serviceDemand.getComponentCount()/2; i++)
+			{
+				try { parameters.add(Double.parseDouble(((JTextField)p_serviceDemand.getComponent(i*2 + 1)).getText().trim())); }
+				catch (Exception exception) { allValid = false; }
+			}
+			
+			if(!allValid)
+				JOptionPane.showMessageDialog(this, serviceDemandInputError);
+			else
+			{
+				ArrayList<String> output = Functions.serviceDemand(parameters);
+				serviceDemandOutputPanel.removeAll();
+				((GridLayout)serviceDemandOutputPanel.getLayout()).setRows(output.size());
+				for(int i = 0; i < output.size(); i++)
+				{
+					JLabel jL = new JLabel();
+					jL.setFont(new Font("Arial", (output.get(i).charAt(14) == ':')?Font.BOLD:Font.PLAIN, 12));
+					jL.setText(" " + output.get(i));
+					serviceDemandOutputPanel.add(jL);
+				}
+				
+				revalidate();
+				repaint();
+				serviceDemandOutputPane.getVerticalScrollBar().setValue(serviceDemandOutputPane.getVerticalScrollBar().getMaximum());
+			}
+		}
+		else if(e.getSource() == serviceDemandClearButton)
+		{
+			for(int i = 0; i < p_serviceDemand.getComponentCount()/2; i++)
+				((JTextField)p_serviceDemand.getComponent(i*2 + 1)).setText("");
+			
+			serviceDemandOutputPanel.removeAll();
+			revalidate();
+			repaint();
+		}
+		else if(e.getSource() == clusteringCalculateButton)
 		{
 			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
 			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
@@ -277,7 +325,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 					break;
 			}
 			
-			JOptionPane.showMessageDialog(this, (result)?successfulComputation:errornousComputation);
+			JOptionPane.showMessageDialog(this, (result)?clusteringSuccessfulComputation:clusteringErrornousComputation);
 		}
 		else if(e.getSource() == clusteringAddButton)
 			updateScrollPane(getGUIPointCount(dimensionCount) + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));

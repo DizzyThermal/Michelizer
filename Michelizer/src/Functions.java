@@ -1,26 +1,65 @@
-import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 public class Functions
 {
 	// Static Variables
-	public static final int MANHATTEN		= 0;
-	public static final int EUCLIDEAN		= 1;
+	public static final int MANHATTEN			= 0;
+	public static final int EUCLIDEAN			= 1;
 	
-	public static final int MST				= 0;
-	public static final int KMEANS			= 1;
-	public static final int ZSCORE			= 2;
+	public static final int MST					= 0;
+	public static final int KMEANS				= 1;
+	public static final int ZSCORE				= 2;
 	
-	public static final int LAMBDA			= 0;
-	public static final int RANDOM			= 1;
-	public static final int BLOCK_SIZE		= 2;
-	public static final int RUN_LENGTH		= 3;
-	public static final int RPM				= 4;
-	public static final int SEEK_RANDOM		= 5;
-	public static final int TRANSFER_RATE	= 6;
-	public static final int CONTROLLER_TIME	= 7;
+	public static final int ZSCORE_LARGE_VALUE	= 100;
+	
+	public static final int LAMBDA				= 0;
+	public static final int RANDOM				= 1;
+	public static final int BLOCK_SIZE			= 2;
+	public static final int RUN_LENGTH			= 3;
+	public static final int RPM					= 4;
+	public static final int SEEK_RANDOM			= 5;
+	public static final int TRANSFER_RATE		= 6;
+	public static final int CONTROLLER_TIME		= 7;
+	public static final int ITERATIONS			= 8;
+	
+	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
+															"Random Seek Time", "Service Demand Sequential",
+															"Service Demand"									};
 
+	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
+	{
+		ArrayList<String> output = new ArrayList<String>();
+		double serviceDemandRandom =	parameters.get(CONTROLLER_TIME) + parameters.get(SEEK_RANDOM) +
+										(0.5 * (60/parameters.get(RPM)) * 1000) +
+										((parameters.get(BLOCK_SIZE)*1000)/(parameters.get(TRANSFER_RATE)*1000000));
+		output.add(serviceDemandOutputStrings[0] + ": " + round(serviceDemandRandom));
+		double utilization = 0.0;
+		double randomSeekTime = 0.0;
+		double serviceDemandSequential = 0.0;
+		double serviceDemand = 0.0;
+		for(int i = 0; i < parameters.get(ITERATIONS); i++)
+		{
+			utilization = (i > 0)?(parameters.get(LAMBDA)/1000)*serviceDemand:(parameters.get(LAMBDA)/1000)*serviceDemandRandom;
+			output.add(serviceDemandOutputStrings[1] + ": " + round(utilization));
+			randomSeekTime = ((0.5 + (parameters.get(RUN_LENGTH)-1)*((1+utilization)/(2)))/(parameters.get(RUN_LENGTH)))*(60/parameters.get(RPM))*1000;
+			output.add(serviceDemandOutputStrings[2] + ": " + round(randomSeekTime));
+			serviceDemandSequential = parameters.get(CONTROLLER_TIME) + (1/parameters.get(RUN_LENGTH))*((parameters.get(BLOCK_SIZE)*1000)/(parameters.get(TRANSFER_RATE)*1000000)) + parameters.get(SEEK_RANDOM)/parameters.get(RUN_LENGTH) + randomSeekTime;
+			output.add(serviceDemandOutputStrings[3] + ": " + round(serviceDemandSequential));
+			serviceDemand = ((parameters.get(RANDOM))/(100))*serviceDemandRandom + ((100-parameters.get(RANDOM))/(100))*serviceDemandSequential;
+			output.add(serviceDemandOutputStrings[4] + ": " + round(serviceDemand));
+		}
+
+		return output;
+	}
+	
+	public static double round(Double value)
+	{
+		return Double.valueOf(new DecimalFormat("#.###").format(value));
+	}
+	
 	public static double getDistance(Point p1, Point p2, int distanceType)
 	{
 		double sum = 0.0;
@@ -249,21 +288,56 @@ public class Functions
         }
         
 		file.close();
-		return false;
+		return true;
 	}
 	
 	public static boolean Z_Score(ArrayList<Point> points)throws IOException
 	{
 		FileWriter file = new FileWriter(getOperatingSystemPath());
-		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+		ArrayList<Double> means = new ArrayList<Double>();
+		ArrayList<Double> deviations = new ArrayList<Double>();
+
+		for(int i = 0; i < points.get(i).getDimensionSize(); i++)
+		{
+			double sum = 0.0;
+			for(int j = 0; j < points.size(); j++)
+				sum += points.get(j).getValueAtDimension(i);
+			
+			means.add(sum/points.size());
+			deviations.add((Double)Math.sqrt(Math.pow(sum - means.get(i), 2) / (points.size() - ((points.size() < ZSCORE_LARGE_VALUE)?1:0))));
+		}
 		
-		// Make Every Point a Cluster
-        for (int i = 0; i < points.size(); i++)
-        	clusters.add(new Cluster(points.get(i), "C" + (i+1)));
-        
-        // Algorithm - Needs to be added
+		file.append("Original Points:");
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append(",");
+		file.append("Z-Score Points:\n");
+
+		for(int i = 0; i < points.size(); i++)
+		{
+			for(int j = 0; j < points.get(0).getDimensionSize(); j++)
+				file.append((points.get(i).getValueAtDimension(j) - means.get(j)) / deviations.get(j) + ",");
+			file.append("\n");
+		}
+		file.append("\n");
+		
+		file.append("Means:\n");
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append("D" + (i+1) + ",");
+		file.append("\n");
+		
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append(means.get(i) + ",");
+		file.append("\n\n");
+		
+		file.append("Deviations:\n");
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append("D" + (i+1) + ",");
+		file.append("\n");
+
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append(deviations.get(i) + ",");
 
         file.close();
-		return false;
+		return true;
 	}
 }
