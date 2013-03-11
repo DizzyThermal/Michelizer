@@ -11,6 +11,15 @@ public class Functions
 	public static final int MST				= 0;
 	public static final int KMEANS			= 1;
 	public static final int ZSCORE			= 2;
+	
+	public static final int LAMBDA			= 0;
+	public static final int RANDOM			= 1;
+	public static final int BLOCK_SIZE		= 2;
+	public static final int RUN_LENGTH		= 3;
+	public static final int RPM				= 4;
+	public static final int SEEK_RANDOM		= 5;
+	public static final int TRANSFER_RATE	= 6;
+	public static final int CONTROLLER_TIME	= 7;
 
 	public static double getDistance(Point p1, Point p2, int distanceType)
 	{
@@ -252,7 +261,7 @@ public class Functions
         for (int i = 0; i < points.size(); i++)
         	clusters.add(new Cluster(points.get(i), "C" + (i+1)));
         
-        //Algorithm - Needs to be added
+        // Algorithm - Needs to be added
 
         file.close();
 		return false;

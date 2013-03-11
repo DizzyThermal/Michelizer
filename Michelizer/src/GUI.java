@@ -1,5 +1,6 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,9 +13,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -27,38 +28,53 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
 	
-	//Message Strings
+	// Message Strings
 	String successfulComputation = "Computation Completed Successfully!";
 	String errornousComputation = "Error: Something Went Wrong!";
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 
-	// Parameter GridLayout and Panel
-	GridLayout gl = new GridLayout(4,1);
-	JPanel p = new JPanel(gl);
+	// Overall Tabbed Pane
+	JTabbedPane jTP = new JTabbedPane();
+	JPanel pane_serviceDemand = new JPanel(new FlowLayout());
+	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	
-	// Point Field GridLayout, Panel, and ScrollPane
-	GridLayout spGridLayout = new GridLayout(5, 3);
-	JPanel spPanel = new JPanel(spGridLayout);
-	JScrollPane sp = new JScrollPane(spPanel);
-	JScrollBar vScrollBar;
+	// GUI Panels
+	JPanel p_serviceDemand = new JPanel(new GridLayout(8,1));
+	JPanel p_clustering = new JPanel(new GridLayout(4,1));
+	
+	// Point Field
+	JPanel pointPanel = new JPanel(new GridLayout(5,3));
+	JScrollPane pointScrollPane = new JScrollPane(pointPanel);
+	
+	// Service Demand Output
+	JPanel serviceDemandOutputPanel = new JPanel(new GridLayout(8,2));
+	JScrollPane serviceDemandOutputPane = new JScrollPane(serviceDemandOutputPanel);
 
-	// Button Panel and Buttons
-	JPanel pButtons1 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	JPanel pButtons2 = new JPanel();
-	JButton calculateButton = new JButton("Calculate");
-	JButton clearButton = new JButton("Clear Fields");
-	JButton addButton = new JButton("+");
-	JButton removeButton = new JButton("-");
+	// Clustering Button Panel and Buttons
+	JPanel clusteringButtonPanel1 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	JPanel clusteringButtonPanel2 = new JPanel();
+	JButton clusteringCalculateButton = new JButton("Calculate");
+	JButton clusteringClearButton = new JButton("Clear Fields");
+	JButton clusteringAddButton = new JButton("+");
+	JButton clusteringRemoveButton = new JButton("-");
 
-	// Labels and Fields
-	ArrayList<JLabel> labels = new ArrayList<JLabel>();
+	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
 	ArrayList<JSpinner> spinners = new ArrayList<JSpinner>();
 
 	// Label Strings
-	String[] labelStrings 		= {"Algorithm", "Distance Type", "Dimensions", "Clusters"};
-	String[] algorithmStrings	= {"MST", "K-Means", "Z-Score"};
-	String[] distanceStrings	= {"Manhatten", "Euclidean"};
+	String[] clusteringLabelStrings 	= {	"Algorithm", "Distance Type",
+											"Dimensions", "Clusters"		};
+	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"		};
+	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"		};
+	
+	String[] serviceDemandInputLabelStrings 	= {	"Lambda", "Random %",
+													"Block Size (Bytes)", "Run Length",
+													"RPM", "Seek-Random (ms)",
+													"Transfer Rate (MB/s", "Controller Time (ms)"	};
+	String[] serviceDemandOutputLabelStrings	= {	"Service Demand Random", "Utilization",
+													"Random Seek Time", "Service Demand Sequential",
+													"Service Demand"								};
 
 	GUI()
 	{
@@ -66,12 +82,35 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		FlowLayout fl = new FlowLayout();
 		fl.setAlignment(FlowLayout.LEFT);
 		setLayout(fl);
-
-		for(int i = 0; i < labelStrings.length; i++)
-			labels.add(new JLabel(labelStrings[i] + ":"));
 		
-		comboBoxes.add(new JComboBox<String>(algorithmStrings));
-		comboBoxes.add(new JComboBox<String>(distanceStrings));
+		createPane1();
+		createPane2();
+		
+		jTP.setPreferredSize(new Dimension(300, 425));
+		jTP.addTab("Service Demand", pane_serviceDemand);
+		jTP.addTab("Clustering", pane_clustering);
+		add(jTP);
+	}
+	
+	public void createPane1()
+	{
+		for(int i = 0; i < serviceDemandInputLabelStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 12));
+			jL.setText(serviceDemandInputLabelStrings[i]);
+			p_serviceDemand.add(jL);
+			p_serviceDemand.add(new JTextField());
+		}
+		
+		p_serviceDemand.setPreferredSize(new Dimension(275, 200));
+		pane_serviceDemand.add(p_serviceDemand);
+	}
+	
+	public void createPane2()
+	{
+		comboBoxes.add(new JComboBox<String>(clusteringAlgorithmStrings));
+		comboBoxes.add(new JComboBox<String>(clusteringDistanceStrings));
 		
 		spinners.add(new JSpinner(new SpinnerNumberModel(3, 1, 10, 1)));
 		spinners.add(new JSpinner(new SpinnerNumberModel(4, 1, 100, 1)));
@@ -80,42 +119,42 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		spinners.get(0).addChangeListener(this);
 		spinners.get(1).setValue(clusterCount);
 		
-		for(int i = 0; i < labels.size(); i++)
+		for(int i = 0; i < clusteringLabelStrings.length; i++)
 		{
-			p.add(labels.get(i));
-			p.add((i > 1)?spinners.get(i-2):comboBoxes.get(i));
+			p_clustering.add(new JLabel(clusteringLabelStrings[i] + ":"));
+			p_clustering.add((i > 1)?spinners.get(i-2):comboBoxes.get(i));
 		}
 
-		sp.setPreferredSize(new Dimension(285, 200));
-		vScrollBar = sp.getVerticalScrollBar();
-		add(p);
-		add(sp);
+		pointScrollPane.setPreferredSize(new Dimension(285, 200));
+		pane_clustering.add(p_clustering);
+		pane_clustering.add(pointScrollPane);
 		
-		pButtons1.add(addButton);
-		pButtons1.add(removeButton);
-		pButtons2.add(calculateButton);
-		pButtons2.add(clearButton);
-		addButton.addActionListener(this);
-		removeButton.addActionListener(this);
-		calculateButton.addActionListener(this);
-		clearButton.addActionListener(this);
+		clusteringButtonPanel1.add(clusteringAddButton);
+		clusteringButtonPanel1.add(clusteringRemoveButton);
+		clusteringButtonPanel2.add(clusteringCalculateButton);
+		clusteringButtonPanel2.add(clusteringClearButton);
+		clusteringAddButton.addActionListener(this);
+		clusteringRemoveButton.addActionListener(this);
+		clusteringCalculateButton.addActionListener(this);
+		clusteringClearButton.addActionListener(this);
 		
-		add(pButtons1);
-		add(pButtons2);
+		pane_clustering.add(clusteringButtonPanel1);
+		pane_clustering.add(clusteringButtonPanel2);
 		
 		updateScrollPane(5, dimensionCount, null);
 	}
 	
 	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
 	{
-		spPanel.removeAll();
-		spGridLayout.setRows(points+1);
-		spGridLayout.setColumns(dimensions);
+		
+		pointPanel.removeAll();
+		((GridLayout)pointPanel.getLayout()).setRows(points+1);
+		((GridLayout)pointPanel.getLayout()).setColumns(dimensions);
 		for(int i = 0; i < dimensions; i++)
 		{
 			JLabel jL = new JLabel("D" + (i+1));
 			jL.setHorizontalAlignment(JLabel.CENTER);
-			spPanel.add(jL);
+			pointPanel.add(jL);
 		}
 
 		if(savedPoints == null)
@@ -124,7 +163,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			{
 				for(int j = 0; j < dimensions; j++)
 				{
-					spPanel.add(new JTextField("0.0"));
+					pointPanel.add(new JTextField("0.0"));
 				}
 			}
 		}
@@ -135,20 +174,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			{
 				for(int j = 0; j < dimensions; j++)
 				{
-					try { spPanel.add(new JTextField(savedPoints.get(index++))); }
-					catch (Exception e) { spPanel.add(new JTextField("0.0")); }
+					try { pointPanel.add(new JTextField(savedPoints.get(index++))); }
+					catch (Exception e) { pointPanel.add(new JTextField("0.0")); }
 				}
 			}
 		}
 
 		revalidate();
 		repaint();
-		vScrollBar.setValue(vScrollBar.getMaximum());
+		pointScrollPane.getVerticalScrollBar().setValue(pointScrollPane.getVerticalScrollBar().getMaximum());
 	}
 	
 	public int getGUIPointCount(int dimToUse)
 	{
-		return spPanel.getComponentCount() / dimToUse - 1;
+		return pointPanel.getComponentCount() / dimToUse - 1;
 	}
 	
 	public ArrayList<Point> getPointsFromGUI(int dimensionCount)
@@ -161,7 +200,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			Point p = new Point();
 			for(int j = 0; j < dimensionCount; j++)
 			{
-				String val = ((JTextField)spPanel.getComponent((i*dimensionCount) + j)).getText();
+				String val = ((JTextField)pointPanel.getComponent((i*dimensionCount) + j)).getText();
 				Double dValue;
 				try
 				{
@@ -215,7 +254,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		if(e.getSource() == calculateButton)
+		if(e.getSource() == clusteringCalculateButton)
 		{
 			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
 			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
@@ -240,17 +279,17 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			
 			JOptionPane.showMessageDialog(this, (result)?successfulComputation:errornousComputation);
 		}
-		else if(e.getSource() == addButton)
+		else if(e.getSource() == clusteringAddButton)
 			updateScrollPane(getGUIPointCount(dimensionCount) + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
-		else if(e.getSource() == removeButton)
+		else if(e.getSource() == clusteringRemoveButton)
 		{
 			if(getGUIPointCount(dimensionCount) > 1)
 				updateScrollPane(getGUIPointCount(dimensionCount) - 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
 		}
-		else if(e.getSource() == clearButton)
+		else if(e.getSource() == clusteringClearButton)
 		{
 			for(int i = dimensionCount; i < getGUIPointCount(dimensionCount)*dimensionCount+dimensionCount; i++)
-				((JTextField)spPanel.getComponent(i)).setText("");
+				((JTextField)pointPanel.getComponent(i)).setText("");
 		}
 	}
 }
