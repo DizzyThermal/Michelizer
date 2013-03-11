@@ -291,7 +291,7 @@ public class Functions
 		return true;
 	}
 	
-	public static boolean Z_Score(ArrayList<Point> points)throws IOException
+	public static boolean Z_Score(ArrayList<Point> points) throws IOException
 	{
 		FileWriter file = new FileWriter(getOperatingSystemPath());
 		ArrayList<Double> means = new ArrayList<Double>();
@@ -304,13 +304,29 @@ public class Functions
 				sum += points.get(j).getValueAtDimension(i);
 			
 			means.add(sum/points.size());
-			deviations.add((Double)Math.sqrt(Math.pow(sum - means.get(i), 2) / (points.size() - ((points.size() < ZSCORE_LARGE_VALUE)?1:0))));
+			sum = 0.0;
+			for(int j = 0; j < points.size(); j++)
+				sum += Math.pow(points.get(j).getValueAtDimension(i) - means.get(i), 2);
+			deviations.add(Math.sqrt(sum / (points.size() - ((points.size() < ZSCORE_LARGE_VALUE)?1:0))));
 		}
 		
-		file.append("Original Points:");
+		file.append("Z-Score:\n\n");
+		file.append("Original Points:\n");
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append(",");
-		file.append("Z-Score Points:\n");
+			file.append("D" + (i+1) + ",");
+		file.append("\n");
+		
+		for(int i = 0; i < points.size(); i++)
+		{
+			for(int j = 0; j < points.get(0).getDimensionSize(); j++)
+				file.append(points.get(i).getValueAtDimension(j) + ",");
+			file.append("\n");
+		}
+		
+		file.append("\nZ-Score Points:\n");
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			file.append("D" + (i+1) + ",");
+		file.append("\n");
 
 		for(int i = 0; i < points.size(); i++)
 		{
@@ -318,18 +334,16 @@ public class Functions
 				file.append((points.get(i).getValueAtDimension(j) - means.get(j)) / deviations.get(j) + ",");
 			file.append("\n");
 		}
-		file.append("\n");
-		
-		file.append("Means:\n");
+
+		file.append("\nMeans:\n");
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
 			file.append("D" + (i+1) + ",");
 		file.append("\n");
 		
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
 			file.append(means.get(i) + ",");
-		file.append("\n\n");
-		
-		file.append("Deviations:\n");
+
+		file.append("\n\nDeviations:\n");
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
 			file.append("D" + (i+1) + ",");
 		file.append("\n");
