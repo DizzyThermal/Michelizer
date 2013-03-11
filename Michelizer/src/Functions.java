@@ -85,7 +85,7 @@ public class Functions
 	
 	public static String getOperatingSystemPath()
 	{
-		if (System.getProperty("os.name").equals("Windows"))
+		if (System.getProperty("os.name").split(" ")[0].equals("Windows"))
 		{
 			if(Double.parseDouble(System.getProperty("os.version")) > 5.1)
 				return "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\Result.csv";
