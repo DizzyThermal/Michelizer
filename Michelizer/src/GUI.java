@@ -31,17 +31,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	// Message Strings
 	String clusteringSuccessfulComputation = "Computation Completed Successfully!";
 	String clusteringErrornousComputation = "Error: Something Went Wrong!";
-	String serviceDemandInputError = "Error: All values must be numeric!";
+	String inputError = "Error: All values must be numeric!";
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
+	String poissonNote = "*For a K Range, put '..' between two integers";
 
 	// Overall Tabbed Pane
 	JTabbedPane jTP = new JTabbedPane();
 	JPanel pane_serviceDemand = new JPanel(new FlowLayout());
 	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	JPanel pane_poisson = new JPanel(new FlowLayout());
 	
 	// GUI Panels
 	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
+	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	
 	// Point Field
 	JPanel pointPanel = new JPanel(new GridLayout(5,3));
@@ -62,6 +65,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	// Service Demand Button Panel and Buttons
 	JButton serviceDemandCalculateButton = new JButton("Calculate");
 	JButton serviceDemandClearButton = new JButton("Clear");
+	
+	// Poisson Probability Button Panel and Buttons
+	JButton poissonCalculateButton = new JButton("Calculate");
+	JButton poissonClearButton = new JButton("Clear");
 
 	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
@@ -79,6 +86,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 													"Transfer Rate (MB/s", "Controller Time (ms)",
 													"Iterations"									};
 
+	String[] poissonLabelStrings 	= {	"L", "K*",
+													"t"			};
+	
 	GUI()
 	{
 		super("Michelizer - The All-In-One ECE 460 Solver");
@@ -88,10 +98,12 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		
 		createPane1();
 		createPane2();
+		createPane3();
 		
 		jTP.setPreferredSize(new Dimension(300, 425));
 		jTP.addTab("Service Demand", pane_serviceDemand);
 		jTP.addTab("Clustering", pane_clustering);
+		jTP.addTab("Poisson", pane_poisson);
 		add(jTP);
 	}
 	
@@ -152,6 +164,34 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		pane_clustering.add(clusteringButtonPanel2);
 		
 		updateScrollPane(5, dimensionCount, null);
+	}
+	
+	public void createPane3()
+	{
+		for(int i = 0; i < poissonLabelStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 14));
+			jL.setText(poissonLabelStrings[i] + ":");
+			jL.setPreferredSize(new Dimension(20, 25));
+			JTextField jTF = new JTextField();
+			jTF.setPreferredSize(new Dimension(175, 25));
+			p_poisson.add(jL);
+			p_poisson.add(jTF);
+		}
+		
+		p_poisson.setPreferredSize(new Dimension(210, 100));
+		poissonCalculateButton.addActionListener(this);
+		poissonClearButton.addActionListener(this);
+		
+		pane_poisson.add(p_poisson);
+		pane_poisson.add(poissonCalculateButton);
+		pane_poisson.add(poissonClearButton);
+		
+		JLabel jL = new JLabel();
+		jL.setFont(new Font("Arial", Font.BOLD, 12));
+		jL.setText(poissonNote);
+		pane_poisson.add(jL);
 	}
 	
 	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
@@ -274,7 +314,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			}
 			
 			if(!allValid)
-				JOptionPane.showMessageDialog(this, serviceDemandInputError);
+				JOptionPane.showMessageDialog(this, inputError);
 			else
 			{
 				ArrayList<String> output = Functions.serviceDemand(parameters);
@@ -338,6 +378,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			for(int i = dimensionCount; i < getGUIPointCount(dimensionCount)*dimensionCount+dimensionCount; i++)
 				((JTextField)pointPanel.getComponent(i)).setText("");
+		}
+		else if(e.getSource() == poissonCalculateButton)
+		{
+			ArrayList<String> parameters = new ArrayList<String>();
+			boolean allValid = true;
+			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
+				parameters.add(((JTextField)p_poisson.getComponent(i*2 + 1)).getText().trim());
+			
+			JOptionPane.showMessageDialog(this, (allValid)?Functions.poisson(parameters):inputError);
+		}
+		else if(e.getSource() == poissonClearButton)
+		{
+			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
+				((JTextField)p_poisson.getComponent(i*2 + 1)).setText("");
 		}
 	}
 }

@@ -25,6 +25,9 @@ public class Functions
 	public static final int CONTROLLER_TIME		= 7;
 	public static final int ITERATIONS			= 8;
 	
+	public static final int K					= 1;
+	public static final int t					= 2;
+	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
 															"Random Seek Time", "Service Demand Sequential",
 															"Service Demand"									};
@@ -353,5 +356,45 @@ public class Functions
 
         file.close();
 		return true;
+	}
+	
+	public static String poisson(ArrayList<String> parameters)
+	{
+		double lambda = Double.parseDouble(parameters.get(LAMBDA));
+		String k = parameters.get(K);
+		double time = Double.parseDouble(parameters.get(t));
+		
+		// Check if K is a Range
+		boolean isARange = k.contains("..");
+
+		if(isARange)
+		{
+			int start = Integer.parseInt(k.split("\\.\\.")[0]);
+			int end = Integer.parseInt(k.split("\\.\\.")[1]);
+
+			// Swap values if Range is backwards (E.g. 4..0)
+			if(start > end)
+			{
+				int temp = start;
+				start = end;
+				end = temp;
+			}
+
+			double sum = 0.0;
+			for(int i = start; i <= end; i++)
+				sum += (Math.exp(-lambda*time)*Math.pow(lambda*time, i)) / factorial(i);
+			
+			return "Probability: " + sum;
+		}
+		else
+			return "Probability: " + round((Math.exp(-lambda*time)*Math.pow(lambda*time, Integer.parseInt(k))) / factorial(Integer.parseInt(k)));
+	}
+	
+	public static int factorial(int n)
+	{
+		if (n == 0)
+			return 1;
+		else
+			return n * factorial(n - 1);
 	}
 }
