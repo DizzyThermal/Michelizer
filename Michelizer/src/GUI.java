@@ -2,11 +2,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.script.ScriptException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -385,7 +387,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
 				parameters.add(((JTextField)p_poisson.getComponent(i*2 + 1)).getText().trim());
 			
-			JOptionPane.showMessageDialog(this, (allValid)?Functions.poisson(parameters):inputError);
+			try { JOptionPane.showMessageDialog(this, (allValid)?Functions.poisson(parameters):inputError); }
+			catch (HeadlessException e1)	{ e1.printStackTrace(); }
+			catch (ScriptException e1)		{ e1.printStackTrace(); }
 		}
 		else if(e.getSource() == poissonClearButton)
 		{

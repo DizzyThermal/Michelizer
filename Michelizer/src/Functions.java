@@ -3,6 +3,10 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 public class Functions
 {
 	// Static Variables
@@ -374,9 +378,11 @@ public class Functions
 		return true;
 	}
 	
-	public static String poisson(ArrayList<String> parameters)
+	public static String poisson(ArrayList<String> parameters) throws ScriptException
 	{
-		double lambda = Double.parseDouble(parameters.get(LAMBDA));
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		ScriptEngine engine = mgr.getEngineByName("JavaScript");
+		double lambda = (double)engine.eval(parameters.get(LAMBDA));
 		String k = parameters.get(K);
 		double time = Double.parseDouble(parameters.get(t));
 		
