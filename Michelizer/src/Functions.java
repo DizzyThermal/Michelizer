@@ -115,7 +115,12 @@ public class Functions
         while (clusters.size() > numOfClusters)
         {
         	for(Cluster c: clusters)
-        		file.append("," + c.getName());
+        	{
+        		if(c.getName().contains("|"))
+            		file.append("," + "[" + c.getName() + "]");
+            	else
+            		file.append("," + c.getName());
+        	}
 
         	file.append("\n");
             
@@ -124,7 +129,10 @@ public class Functions
             double min = Double.MAX_VALUE;
             for (int i = 0; i < clusters.size(); i++)
             {
-                file.append(clusters.get(i).getName() + ",");
+            	if(clusters.get(i).getName().contains("|"))
+            		file.append("[" + clusters.get(i).getName() + "]" + ",");
+            	else
+            		file.append(clusters.get(i).getName() + ",");
                 for (int j = 0; j < clusters.size(); j++)
                 {
                 	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
@@ -144,19 +152,27 @@ public class Functions
             for (int i = 0; i < clusters.get(index2).getNumberOfPoints(); i++)
                 clusters.get(index1).addPoint(clusters.get(index2).getPointAt(i));
 
-            clusters.get(index1).setName("[" + clusters.get(index1).getName() + "|" + clusters.get(index2).getName() + "]");
+            clusters.get(index1).setName(clusters.get(index1).getName() + "|" + clusters.get(index2).getName());
             clusters.remove(index2);
 
         }
 
         for (int i = 0; i < clusters.size(); i++)
-            file.append("," + clusters.get(i).getName());
+        {
+        	if(clusters.get(i).getName().contains("|"))
+        		file.append("," + "[" + clusters.get(i).getName() + "]");
+        	else
+        		file.append("," + clusters.get(i).getName());
+        }
 
         file.append("\n");
 
         for (int i = 0; i < clusters.size(); i++)
         {
-            file.append(clusters.get(i).getName() + ",");
+        	if(clusters.get(i).getName().contains("|"))
+        		file.append("[" + clusters.get(i).getName() + "]" + ",");
+        	else
+        		file.append(clusters.get(i).getName() + ",");
             for (int j = 0; j < clusters.size(); j++)
                 file.append(getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
 
@@ -166,7 +182,7 @@ public class Functions
 		file.close();
 		return true;
 	}
-
+	
 	public static boolean K_Means(ArrayList<Point> points, int numberOfClusters, int distanceType) throws IOException
 	{
 		FileWriter file = new FileWriter(getOperatingSystemPath());
@@ -384,7 +400,7 @@ public class Functions
 			for(int i = start; i <= end; i++)
 				sum += (Math.exp(-lambda*time)*Math.pow(lambda*time, i)) / factorial(i);
 			
-			return "Probability: " + sum;
+			return "Probability: " + round(sum);
 		}
 		else
 			return "Probability: " + round((Math.exp(-lambda*time)*Math.pow(lambda*time, Integer.parseInt(k))) / factorial(Integer.parseInt(k)));

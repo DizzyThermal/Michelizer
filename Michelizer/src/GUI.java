@@ -80,14 +80,13 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"		};
 	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"		};
 	
-	String[] serviceDemandInputLabelStrings 	= {	"Lambda", "Random %",
-													"Block Size (Bytes)", "Run Length",
-													"RPM", "Seek-Random (ms)",
-													"Transfer Rate (MB/s", "Controller Time (ms)",
-													"Iterations"									};
+	String[] serviceDemandInputLabelStrings = {	"Lambda", "Random %",
+												"Block Size (Bytes)", "Run Length",
+												"RPM", "Seek-Random (ms)",
+												"Transfer Rate (MB/s", "Controller Time (ms)",
+												"Iterations"									};
 
-	String[] poissonLabelStrings 	= {	"L", "K*",
-													"t"			};
+	String[] poissonLabelStrings 	= {	"L", "K*", "t" };
 	
 	GUI()
 	{
