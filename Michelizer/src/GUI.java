@@ -30,6 +30,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
 	
+	private static final int DISK_NOTE			= 0;
+	private static final int DISK_DATA_ERROR	= 1;
+	private static final int DISK_RANDOM_ERROR	= 2;
+	
 	// Message Strings
 	String clusteringSuccessfulComputation = "Computation Completed Successfully!";
 	String clusteringErrornousComputation = "Error: Something Went Wrong!";
@@ -37,14 +41,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 	String poissonNote = "*For a K Range, put '..' between two integers";
 
+	String[] diskAccessTimeMessages = {	"*Input Data Locations Separated by Commas: \",\"",
+									"Data Locations must be Integers!",
+									"Seek Random Time must be an Integer!" };
+
 	// Overall Tabbed Pane
 	JTabbedPane jTP = new JTabbedPane();
 	JPanel pane_serviceDemand = new JPanel(new FlowLayout());
+	JPanel pane_diskAccessTime = new JPanel(new FlowLayout());
 	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel pane_poisson = new JPanel(new FlowLayout());
 	
 	// GUI Panels
 	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
+	JPanel p_diskAccessTime = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
 	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	
@@ -56,6 +66,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JPanel serviceDemandOutputPanel = new JPanel(new GridLayout(8,1));
 	JScrollPane serviceDemandOutputPane = new JScrollPane(serviceDemandOutputPanel);
 
+	// Service Demand Button Panel and Buttons
+	JButton serviceDemandCalculateButton = new JButton("Calculate");
+	JButton serviceDemandClearButton = new JButton("Clear");
+	
+	// Poisson Probability Button Panel and Buttons
+	JButton diskAccessTimeCalculateButton = new JButton("Calculate");
+	JButton diskAccessTimeClearButton = new JButton("Clear");
+	
 	// Clustering Button Panel and Buttons
 	JPanel clusteringButtonPanel1 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 	JPanel clusteringButtonPanel2 = new JPanel();
@@ -63,10 +81,6 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JButton clusteringClearButton = new JButton("Clear Fields");
 	JButton clusteringAddButton = new JButton("+");
 	JButton clusteringRemoveButton = new JButton("-");
-	
-	// Service Demand Button Panel and Buttons
-	JButton serviceDemandCalculateButton = new JButton("Calculate");
-	JButton serviceDemandClearButton = new JButton("Clear");
 	
 	// Poisson Probability Button Panel and Buttons
 	JButton poissonCalculateButton = new JButton("Calculate");
@@ -77,16 +91,18 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	ArrayList<JSpinner> spinners = new ArrayList<JSpinner>();
 
 	// Label Strings
+	String[] serviceDemandInputLabelStrings = {	"Lambda", "Random %",
+			"Block Size (Bytes)", "Run Length",
+			"RPM", "Seek-Random (ms)",
+			"Transfer Rate (MB/s", "Controller Time (ms)",
+			"Iterations"									};
+	
+	String[] diskAccessTimeLabelStrings = { "Data Locations*", "Seek Random Time (ms)" };
+	
 	String[] clusteringLabelStrings 	= {	"Algorithm", "Distance Type",
 											"Dimensions", "Clusters"		};
 	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"		};
 	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"		};
-	
-	String[] serviceDemandInputLabelStrings = {	"Lambda", "Random %",
-												"Block Size (Bytes)", "Run Length",
-												"RPM", "Seek-Random (ms)",
-												"Transfer Rate (MB/s", "Controller Time (ms)",
-												"Iterations"									};
 
 	String[] poissonLabelStrings 	= {	"L", "K*", "t" };
 	
@@ -100,12 +116,15 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		createPane1();
 		createPane2();
 		createPane3();
+		createPane4();
 		
-		jTP.setPreferredSize(new Dimension(300, 425));
-		jTP.addTab("Service Demand", pane_serviceDemand);
+		jTP.setPreferredSize(new Dimension(300, 450));
 		jTP.addTab("Clustering", pane_clustering);
 		jTP.addTab("Poisson", pane_poisson);
+		jTP.addTab("Service Demand", pane_serviceDemand);
+		jTP.addTab("Disk Access Time", pane_diskAccessTime);
 		add(jTP);
+		jTP.setSelectedIndex(2);
 	}
 	
 	public void createPane1()
@@ -131,6 +150,33 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	}
 	
 	public void createPane2()
+	{
+		for(int i = 0; i < diskAccessTimeLabelStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 14));
+			jL.setText(diskAccessTimeLabelStrings[i] + ":");
+			JTextField jTF = new JTextField();
+			jTF.setPreferredSize(new Dimension(175, 25));
+			p_diskAccessTime.add(jL);
+			p_diskAccessTime.add(jTF);
+		}
+		
+		p_diskAccessTime.setPreferredSize(new Dimension(210, 125));
+		diskAccessTimeCalculateButton.addActionListener(this);
+		diskAccessTimeClearButton.addActionListener(this);
+		
+		pane_diskAccessTime.add(p_diskAccessTime);
+		pane_diskAccessTime.add(diskAccessTimeCalculateButton);
+		pane_diskAccessTime.add(diskAccessTimeClearButton);
+		
+		JLabel jL = new JLabel();
+		jL.setFont(new Font("Arial", Font.BOLD, 10));
+		jL.setText(diskAccessTimeMessages[DISK_NOTE]);
+		pane_diskAccessTime.add(jL);
+	}
+	
+	public void createPane3()
 	{
 		comboBoxes.add(new JComboBox<String>(clusteringAlgorithmStrings));
 		comboBoxes.add(new JComboBox<String>(clusteringDistanceStrings));
@@ -167,14 +213,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		updateScrollPane(5, dimensionCount, null);
 	}
 	
-	public void createPane3()
+	public void createPane4()
 	{
 		for(int i = 0; i < poissonLabelStrings.length; i++)
 		{
 			JLabel jL = new JLabel();
 			jL.setFont(new Font("Arial", Font.PLAIN, 14));
 			jL.setText(poissonLabelStrings[i] + ":");
-			jL.setPreferredSize(new Dimension(20, 25));
+			jL.setPreferredSize(new Dimension(22, 25));
 			JTextField jTF = new JTextField();
 			jTF.setPreferredSize(new Dimension(175, 25));
 			p_poisson.add(jL);
@@ -190,7 +236,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		pane_poisson.add(poissonClearButton);
 		
 		JLabel jL = new JLabel();
-		jL.setFont(new Font("Arial", Font.BOLD, 12));
+		jL.setFont(new Font("Arial", Font.BOLD, 10));
 		jL.setText(poissonNote);
 		pane_poisson.add(jL);
 	}
@@ -342,6 +388,32 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			serviceDemandOutputPanel.removeAll();
 			revalidate();
 			repaint();
+		}
+		else if(e.getSource() == diskAccessTimeCalculateButton)
+		{
+			ArrayList<Integer> locations = new ArrayList<Integer>();
+			String output = "";
+			int randomSeekTime = 0;
+
+			try { randomSeekTime = Integer.parseInt(((JTextField)p_diskAccessTime.getComponent(3)).getText()); }
+			catch(Exception exception) { output = diskAccessTimeMessages[DISK_RANDOM_ERROR]; };
+			
+			String[] vals = ((JTextField)p_diskAccessTime.getComponent(1)).getText().split(",");
+			for(int i = 0; i < vals.length; i++)
+			{
+				try { locations.add(Integer.parseInt(vals[i].trim())); }
+				catch (Exception exception) { output = diskAccessTimeMessages[DISK_DATA_ERROR]; }
+			}
+			
+			if(output.equals(""))
+				output = Functions.diskAccessTime(locations, randomSeekTime);
+			
+			JOptionPane.showMessageDialog(this, output);
+		}
+		else if(e.getSource() == diskAccessTimeClearButton)
+		{
+			for(int i = 0; i < p_diskAccessTime.getComponentCount()/2; i++)
+				((JTextField)p_diskAccessTime.getComponent(i*2 + 1)).setText("");
 		}
 		else if(e.getSource() == clusteringCalculateButton)
 		{

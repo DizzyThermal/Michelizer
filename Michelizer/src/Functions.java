@@ -105,6 +105,19 @@ public class Functions
 		return null;
 	}
 	
+	public static String diskAccessTime(ArrayList<Integer> locations, int diskAccessTime)
+	{
+		int avgDiskAccessTime = 0;
+		for(int i = 0; i < locations.size()-1; i++)
+		{
+			if((locations.get(i)+1) != locations.get(i+1))
+				avgDiskAccessTime += diskAccessTime;
+		}
+		
+		// +1 more "diskAccessTime" because the FIRST Access is ALWAYS Random!
+		return "Average Disk Access Time: " + round(((avgDiskAccessTime + diskAccessTime)/((double)locations.size()))) + " ms";
+	}
+	
 	public static boolean MST(ArrayList<Point> points, int numOfClusters, int distanceType) throws IOException
 	{
 		FileWriter file = new FileWriter(getOperatingSystemPath());
