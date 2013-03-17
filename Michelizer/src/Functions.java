@@ -1,4 +1,3 @@
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -215,7 +214,12 @@ public class Functions
 	
 	public static boolean K_Means(ArrayList<Point> points, int numberOfClusters, int distanceType) throws IOException
 	{
-		FileWriter file = new FileWriter("Results.csv");
+		ArrayList<String[]> listData = new ArrayList<String[]>();
+		String[] tempData = new String[points.size() + 1];
+		for(int i = 0; i < tempData.length; i++)
+			tempData[i] = " ";
+
+		int dataColumn = 0;
 		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
 		// Make Every Point a Cluster
@@ -262,20 +266,26 @@ public class Functions
             }
 
             // Print Out
+            dataColumn++;
             for (int i = 0; i < clusters.size(); i++)
-                file.append(" ," + clusters.get(i).getName());
+                tempData[dataColumn++] = clusters.get(i).getName();
 
-            file.append("\n");
+            listData.add(tempData);
+            tempData = new String[points.size() + 1];
+    		dataColumn = 0;
 
             for (int i = 0; i < C2.size(); i++)
             {
-                file.append(C2.get(i).getName() + ",");
+            	tempData[dataColumn++] = C2.get(i).getName();
                 for (int j = 0; j < clusters.size(); j++)      	                   
-                    file.append(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+                    tempData[dataColumn++] = Double.toString(round(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType)));
 
-                file.append("\n");
+                listData.add(tempData);
+                tempData = new String[points.size() + 1];
+        		dataColumn = 0;
             }
-            file.append("\n");
+            listData.add(tempData);
+            tempData = new String[points.size() + 1];
 
             // Wipe out all points in each cluster
             for (int i = 0; i < C2.size(); i++)
@@ -299,7 +309,7 @@ public class Functions
             int counter = 0;
             for (int i = 0; i < C2.size(); i++)
             {
-                if (C2old.get(i) == C2.get(i))
+                if (C2.get(i).isEqual(C2old.get(i)))
                     counter++;
             }
 
@@ -308,35 +318,58 @@ public class Functions
             {
                 // Print out
                 for (int i = 0; i < clusters.size(); i++)
-                    file.append(" ," + clusters.get(i).getName());
+                    tempData[++dataColumn] = clusters.get(i).getName();
 
-                file.append("\n");
+                listData.add(tempData);
+                tempData = new String[points.size() + 1];
+        		dataColumn = 0;
 
                 for (int i = 0; i < C2.size(); i++)
                 {
-                    file.append(C2.get(i).getName() + ",");
+                    tempData[dataColumn++] = C2.get(i).getName();
                     for (int j = 0; j < clusters.size(); j++)
-                        file.append(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+                        tempData[dataColumn++] = Double.toString(round(getDistance(C2.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType)));
 
-                    file.append("\n");
+                    listData.add(tempData);
+                    tempData = new String[points.size() + 1];
+            		dataColumn = 0;
                 }
-                file.append("\n");
+                listData.add(tempData);
+                tempData = new String[points.size() + 1];
 
                 for (int i = 0; i < C2.size(); i++)
                 {
-                	file.append(C2.get(i).getName());
+                	tempData[dataColumn++] = C2.get(i).getName();
                 	for(int j=0;j<C2.get(i).getPointAt(0).getDimensionSize();j++)
-                    	file.append(",CenterD"+(i+1)+"= " + C2.get(i).getCentoid().getValueAtDimension(j));
+                    	tempData[dataColumn++] = Double.toString(round(C2.get(i).getCentoid().getValueAtDimension(j)));
                 	
-                    file.append("\n");
+                	listData.add(tempData);
+                    tempData = new String[points.size() + 1];
+            		dataColumn = 0;
                 }
 
-                file.append("\n");
+                listData.add(tempData);
+                tempData = new String[points.size() + 1];
+        		dataColumn = 0;
+
                 break;
             }
         }
         
-		file.close();
+        String[][] data = new String[listData.size()][points.size() + 1];
+		for(int i = 0; i < listData.size(); i++)
+		{
+			for(int j = 0; j < listData.get(i).length; j++)
+				data[i][j] = listData.get(i)[j];
+		}
+        
+		SpreadSheet ss = new SpreadSheet(data);
+		JFrame jF = new JFrame();
+		jF.add(ss);
+		jF.setSize(800, 600);
+		jF.setTitle("K-Means Output");
+		jF.setVisible(true);
+		
 		return true;
 	}
 	
@@ -387,8 +420,7 @@ public class Functions
 		}
 		
 		dataRow++;
-		data[dataRow][dataColumn++] = "Z-Score Points:";
-		dataRow++;
+		data[dataRow++][dataColumn++] = "Z-Score Points:";
 		dataColumn = 0;
 
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)

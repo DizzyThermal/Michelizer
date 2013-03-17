@@ -48,4 +48,21 @@ public class Cluster
 		}
 		this.centoid = centoid;
 	}
+	
+	public boolean isEqual(Cluster c)
+	{
+		if(!name.equals(c.getName()))
+			return false;
+		if(c.getNumberOfPoints() != points.size())
+			return false;
+		for(int i = 0; i < points.size(); i++)
+		{
+			if(!points.get(i).isEqual(c.getPointAt(i)))
+				return false;
+		}
+		if(!centoid.isEqual(c.getCentoid()))
+			return false;
+
+		return true;
+	}
 }

@@ -19,4 +19,17 @@ public class Point
 		
 		return pointStr.substring(0, pointStr.length() - 3);	// Trim last comma and space ( -3 )
 	}
+	
+	public boolean isEqual(Point p)
+	{
+		if(dimensions.size() != p.getDimensionSize())
+			return false;
+		for(int i = 0; i < dimensions.size(); i++)
+		{
+			if(dimensions.get(i) != p.getValueAtDimension(i))
+				return false;
+		}
+		
+		return true;
+	}
 }
