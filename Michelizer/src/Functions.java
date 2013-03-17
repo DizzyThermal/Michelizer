@@ -91,21 +91,6 @@ public class Functions
 		}
 	}
 	
-	public static String getOperatingSystemPath()
-	{
-		if (System.getProperty("os.name").split(" ")[0].equals("Windows"))
-		{
-			if(Double.parseDouble(System.getProperty("os.version")) > 5.1)
-				return "C:\\Users\\" + System.getProperty("user.name") + "\\Desktop\\Result.csv";
-			else
-				return "C:\\Documents and Settings\\" + System.getProperty("user.name") + "\\Desktop\\Result.csv";
-		}
-		else if (System.getProperty("os.name").equals("Linux"))
-			return "/home/" + System.getProperty("user.name") + "/Desktop/Results.csv";
-
-		return null;
-	}
-	
 	public static String diskAccessTime(ArrayList<Integer> locations, int diskAccessTime)
 	{
 		int avgDiskAccessTime = 0;
@@ -136,7 +121,6 @@ public class Functions
 		
 		int dataRow = 0;
 		int dataColumn = 0;
-		FileWriter file = new FileWriter(getOperatingSystemPath());
 		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
 		// Make Every Point a Cluster
@@ -219,13 +203,10 @@ public class Functions
             dataRow++;
         }
 		
-		file.close();
-		
 		SpreadSheet ss = new SpreadSheet(data);
 		JFrame jF = new JFrame();
 		jF.add(ss);
 		jF.setSize(800, 600);
-		//jF.setResizable(false);
 		jF.setTitle("MST Output");
 		jF.setVisible(true);
 		
@@ -234,7 +215,7 @@ public class Functions
 	
 	public static boolean K_Means(ArrayList<Point> points, int numberOfClusters, int distanceType) throws IOException
 	{
-		FileWriter file = new FileWriter(getOperatingSystemPath());
+		FileWriter file = new FileWriter("Results.csv");
 		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
 		// Make Every Point a Cluster
@@ -361,7 +342,20 @@ public class Functions
 	
 	public static boolean Z_Score(ArrayList<Point> points) throws IOException
 	{
-		FileWriter file = new FileWriter(getOperatingSystemPath());
+		int dataHeight = 0;
+		int dataWidth = points.get(0).getDimensionSize();
+		dataHeight = 2*points.size() + 13;
+		
+		String[][] data = new String[dataHeight][dataWidth];
+		for(int i = 0; i < data.length; i++)
+		{
+			for(int j = 0; j < data[i].length; j++)
+				data[i][j] = " ";
+		}
+		
+		int dataRow = 0;
+		int dataColumn = 0;
+
 		ArrayList<Double> means = new ArrayList<Double>();
 		ArrayList<Double> deviations = new ArrayList<Double>();
 
@@ -377,49 +371,66 @@ public class Functions
 				sum += Math.pow(points.get(j).getValueAtDimension(i) - means.get(i), 2);
 			deviations.add(Math.sqrt(sum / (points.size() - ((points.size() < ZSCORE_LARGE_VALUE)?1:0))));
 		}
-		
-		file.append("Z-Score:\n\n");
-		file.append("Original Points:\n");
+
+		data[dataRow++][dataColumn] = "Original Points:";
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append("D" + (i+1) + ",");
-		file.append("\n");
+			data[dataRow][dataColumn++] = "D" + (i+1);
+		dataRow++;
+		dataColumn = 0;
 		
 		for(int i = 0; i < points.size(); i++)
 		{
 			for(int j = 0; j < points.get(0).getDimensionSize(); j++)
-				file.append(points.get(i).getValueAtDimension(j) + ",");
-			file.append("\n");
+				data[dataRow][dataColumn++] = Double.toString(points.get(i).getValueAtDimension(j));
+			dataRow++;
+			dataColumn = 0;
 		}
 		
-		file.append("\nZ-Score Points:\n");
+		dataRow++;
+		data[dataRow][dataColumn++] = "Z-Score Points:";
+		dataRow++;
+		dataColumn = 0;
+
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append("D" + (i+1) + ",");
-		file.append("\n");
+			data[dataRow][dataColumn++] = "D" + (i+1);
+		dataRow++;
+		dataColumn = 0;
 
 		for(int i = 0; i < points.size(); i++)
 		{
 			for(int j = 0; j < points.get(0).getDimensionSize(); j++)
-				file.append((points.get(i).getValueAtDimension(j) - means.get(j)) / deviations.get(j) + ",");
-			file.append("\n");
+				data[dataRow][dataColumn++] = Double.toString(round((points.get(i).getValueAtDimension(j) - means.get(j)) / deviations.get(j)));
+			dataRow++;
+			dataColumn = 0;
 		}
-
-		file.append("\nMeans:\n");
-		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append("D" + (i+1) + ",");
-		file.append("\n");
+		dataRow++;
+		data[dataRow++][dataColumn] = "Means:";
 		
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append(means.get(i) + ",");
-
-		file.append("\n\nDeviations:\n");
+			data[dataRow][dataColumn++] = "D" + (i+1);
+		dataRow++;
+		dataColumn = 0;
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append("D" + (i+1) + ",");
-		file.append("\n");
+			data[dataRow][dataColumn++] = Double.toString(round(means.get(i)));
+		dataRow += 2;
+		dataColumn = 0;
+
+		data[dataRow++][dataColumn] = "Deviations:";
+		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
+			data[dataRow][dataColumn++] = "D" + (i+1);
+		dataRow++;
+		dataColumn = 0;
 
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
-			file.append(deviations.get(i) + ",");
+			data[dataRow][dataColumn++] = Double.toString(round(deviations.get(i)));
 
-        file.close();
+		SpreadSheet ss = new SpreadSheet(data);
+		JFrame jF = new JFrame();
+		jF.add(ss);
+		jF.setSize(800, 600);
+		jF.setTitle("Z-Score Output");
+		jF.setVisible(true);
+		
 		return true;
 	}
 	
