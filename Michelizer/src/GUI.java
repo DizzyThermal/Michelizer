@@ -30,14 +30,17 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	private static int dimensionCount = 3;
 	private static int clusterCount = 4;
 	
+	private static final int COMP_COMPLETE		= 0;
+	private static final int ERROR_NUMERIC		= 1;
+	
 	private static final int DISK_NOTE			= 0;
 	private static final int DISK_DATA_ERROR	= 1;
 	private static final int DISK_RANDOM_ERROR	= 2;
 	
 	// Message Strings
-	String clusteringSuccessfulComputation = "Computation Completed Successfully!";
-	String clusteringErrornousComputation = "Error: Something Went Wrong!";
-	String inputError = "Error: All values must be numeric!";
+	String[] commonStrings = {	"Computation Completed Successfully!",
+								"Error: All Values MUST be Numeric!"	};
+
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 	String poissonNote = "*For a K Range, put '..' between two integers";
 
@@ -180,6 +183,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	{
 		comboBoxes.add(new JComboBox<String>(clusteringAlgorithmStrings));
 		comboBoxes.add(new JComboBox<String>(clusteringDistanceStrings));
+		
+		comboBoxes.get(0).addActionListener(this);
 		
 		spinners.add(new JSpinner(new SpinnerNumberModel(3, 1, 10, 1)));
 		spinners.add(new JSpinner(new SpinnerNumberModel(4, 1, 100, 1)));
@@ -345,6 +350,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			dimensionCount = (Integer)spinners.get(0).getValue();
 			updateScrollPane(getGUIPointCount(oldDim), dimensionCount, getDimensionsFromPoints(getPointsFromGUI(oldDim)));
 		}
+		else if(e.getSource() == comboBoxes.get(0))
+		{
+			switch(comboBoxes.get(0).getSelectedIndex())
+			{
+				case Functions.ZSCORE:
+					comboBoxes.get(1).setEditable(false);
+					spinners.get(1).setEnabled(false);
+					break;
+				default:
+					comboBoxes.get(1).setEditable(true);
+					spinners.get(1).setEnabled(true);
+					break;
+			}
+		}
 	}
 
 	@Override
@@ -361,7 +380,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			}
 			
 			if(!allValid)
-				JOptionPane.showMessageDialog(this, inputError);
+				JOptionPane.showMessageDialog(this, commonStrings[ERROR_NUMERIC]);
 			else
 			{
 				ArrayList<String> output = Functions.serviceDemand(parameters);
@@ -438,7 +457,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 					break;
 			}
 			
-			JOptionPane.showMessageDialog(this, (result)?clusteringSuccessfulComputation:clusteringErrornousComputation);
+			//JOptionPane.showMessageDialog(this, (result)?clusteringSuccessfulComputation:clusteringErrornousComputation);
 		}
 		else if(e.getSource() == clusteringAddButton)
 			updateScrollPane(getGUIPointCount(dimensionCount) + 1, dimensionCount, getDimensionsFromPoints(getPointsFromGUI(dimensionCount)));
@@ -459,7 +478,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
 				parameters.add(((JTextField)p_poisson.getComponent(i*2 + 1)).getText().trim());
 			
-			try { JOptionPane.showMessageDialog(this, (allValid)?Functions.poisson(parameters):inputError); }
+			try { JOptionPane.showMessageDialog(this, (allValid)?Functions.poisson(parameters):commonStrings[ERROR_NUMERIC]); }
 			catch (HeadlessException e1)	{ e1.printStackTrace(); }
 			catch (ScriptException e1)		{ e1.printStackTrace(); }
 		}
@@ -467,6 +486,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
 				((JTextField)p_poisson.getComponent(i*2 + 1)).setText("");
+		}
+		else if(e.getSource() == comboBoxes.get(0))
+		{
+			switch(comboBoxes.get(0).getSelectedIndex())
+			{
+				case Functions.ZSCORE:
+					comboBoxes.get(1).setEnabled(false);
+					spinners.get(1).setEnabled(false);
+					break;
+				default:
+					comboBoxes.get(1).setEnabled(true);
+					spinners.get(1).setEnabled(true);
+					break;
+			}
 		}
 	}
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.swing.JFrame;
 
 public class Functions
 {
@@ -120,6 +121,21 @@ public class Functions
 	
 	public static boolean MST(ArrayList<Point> points, int numOfClusters, int distanceType) throws IOException
 	{
+		int dataHeight = 0;
+		int dataWidth = points.size() + 1;
+		for(int i = 0; i < (points.size() - numOfClusters + 1); i++)
+			dataHeight += points.size() - i + 2;
+		dataHeight -= 1;
+		
+		String[][] data = new String[dataHeight][dataWidth];
+		for(int i = 0; i < data.length; i++)
+		{
+			for(int j = 0; j < data[i].length; j++)
+				data[i][j] = " ";
+		}
+		
+		int dataRow = 0;
+		int dataColumn = 0;
 		FileWriter file = new FileWriter(getOperatingSystemPath());
 		ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 		
@@ -129,17 +145,20 @@ public class Functions
         
         // MST Algorithm (Loop until number of clusters remaining equals desired number of clusters)
         Double distance = 0.0;
+
         while (clusters.size() > numOfClusters)
         {
+        	dataColumn++;
         	for(Cluster c: clusters)
         	{
         		if(c.getName().contains("|"))
-            		file.append("," + "[" + c.getName() + "]");
+            		data[dataRow][dataColumn++] = "[" + c.getName() + "]";
             	else
-            		file.append("," + c.getName());
+            		data[dataRow][dataColumn++] = c.getName();
         	}
 
-        	file.append("\n");
+        	dataColumn = 0;
+        	dataRow++;
             
             int index1 = 0;
             int index2 = 0;
@@ -147,14 +166,14 @@ public class Functions
             for (int i = 0; i < clusters.size(); i++)
             {
             	if(clusters.get(i).getName().contains("|"))
-            		file.append("[" + clusters.get(i).getName() + "]" + ",");
+            		data[dataRow][dataColumn++] = "[" + clusters.get(i).getName() + "]";
             	else
-            		file.append(clusters.get(i).getName() + ",");
+            		data[dataRow][dataColumn++] = clusters.get(i).getName();
                 for (int j = 0; j < clusters.size(); j++)
                 {
                 	distance = getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType);
 
-                    file.append(distance + ",");
+                	data[dataRow][dataColumn++] = Double.toString(round(distance));
                     if ((i != j) && (distance < min))
                     {
                         min = distance;
@@ -162,9 +181,10 @@ public class Functions
                         index2 = j;
                     }
                 }
-                file.append("\n");
+                dataColumn = 0;
+                dataRow++;
             }
-            file.append("\n");
+            dataRow++;
 
             for (int i = 0; i < clusters.get(index2).getNumberOfPoints(); i++)
                 clusters.get(index1).addPoint(clusters.get(index2).getPointAt(i));
@@ -174,29 +194,41 @@ public class Functions
 
         }
 
+        dataColumn++;
         for (int i = 0; i < clusters.size(); i++)
         {
         	if(clusters.get(i).getName().contains("|"))
-        		file.append("," + "[" + clusters.get(i).getName() + "]");
+        		data[dataRow][dataColumn++] = "[" + clusters.get(i).getName() + "]";
         	else
-        		file.append("," + clusters.get(i).getName());
+        		data[dataRow][dataColumn++] = clusters.get(i).getName();
         }
 
-        file.append("\n");
+        dataColumn = 0;
+        dataRow++;
 
         for (int i = 0; i < clusters.size(); i++)
         {
         	if(clusters.get(i).getName().contains("|"))
-        		file.append("[" + clusters.get(i).getName() + "]" + ",");
+        		data[dataRow][dataColumn++] = "[" + clusters.get(i).getName() + "]";
         	else
-        		file.append(clusters.get(i).getName() + ",");
+        		data[dataRow][dataColumn++] = clusters.get(i).getName();
             for (int j = 0; j < clusters.size(); j++)
-                file.append(getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType) + ",");
+            	data[dataRow][dataColumn++] = Double.toString(round(getDistance(clusters.get(i).getCentoid(), clusters.get(j).getCentoid(), distanceType)));
 
-            file.append("\n");
+            dataColumn = 0;
+            dataRow++;
         }
 		
 		file.close();
+		
+		SpreadSheet ss = new SpreadSheet(data);
+		JFrame jF = new JFrame();
+		jF.add(ss);
+		jF.setSize(800, 600);
+		//jF.setResizable(false);
+		jF.setTitle("MST Output");
+		jF.setVisible(true);
+		
 		return true;
 	}
 	
