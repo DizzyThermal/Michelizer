@@ -54,12 +54,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JPanel pane_diskAccessTime = new JPanel(new FlowLayout());
 	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel pane_poisson = new JPanel(new FlowLayout());
+	JPanel pane_infiniteQueue = new JPanel(new FlowLayout());
 	
 	// GUI Panels
 	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
 	JPanel p_diskAccessTime = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
 	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	JPanel p_infiniteQueue = new JPanel(new GridLayout(9,1));
 	
 	// Point Field
 	JPanel pointPanel = new JPanel(new GridLayout(5,3));
@@ -89,6 +91,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	JButton poissonCalculateButton = new JButton("Calculate");
 	JButton poissonClearButton = new JButton("Clear");
 
+	// Infinite Queue Button Panel and Buttons
+	JButton infiniteQueueCalculateButton = new JButton("Calculate");
+	JButton infiniteQueueClearButton = new JButton("Clear");
+	
+	// Service Demand Output
+	JPanel infiniteQueueOutputPanel = new JPanel(new GridLayout(8,1));
+	JScrollPane infiniteQueueOutputPane = new JScrollPane(infiniteQueueOutputPanel);
+	
 	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
 	ArrayList<JSpinner> spinners = new ArrayList<JSpinner>();
@@ -109,6 +119,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 
 	String[] poissonLabelStrings 	= {	"L", "K*", "t" };
 	
+	String[] infiniteQueueLabelStrings	= { "Lambda" , "S0" };
+	
 	GUI()
 	{
 		super("Michelizer - The All-In-One ECE 460 Solver");
@@ -120,14 +132,16 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		createPane2();
 		createPane3();
 		createPane4();
+		createPane5();
 		
 		jTP.setPreferredSize(new Dimension(300, 450));
 		jTP.addTab("Clustering", pane_clustering);
 		jTP.addTab("Poisson", pane_poisson);
+		jTP.addTab("Infinite Queue", pane_infiniteQueue);
 		jTP.addTab("Service Demand", pane_serviceDemand);
 		jTP.addTab("Disk Access Time", pane_diskAccessTime);
 		add(jTP);
-		jTP.setSelectedIndex(2);
+		jTP.setSelectedIndex(3);
 	}
 	
 	public void createPane1()
@@ -244,6 +258,28 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		jL.setFont(new Font("Arial", Font.BOLD, 10));
 		jL.setText(poissonNote);
 		pane_poisson.add(jL);
+	}
+	
+	public void createPane5()
+	{
+		for(int i = 0; i < infiniteQueueLabelStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 12));
+			jL.setText(infiniteQueueLabelStrings[i] + ":");
+			p_infiniteQueue.add(jL);
+			p_infiniteQueue.add(new JTextField());
+		}
+		
+		p_infiniteQueue.setPreferredSize(new Dimension(275, 200));
+		infiniteQueueCalculateButton.addActionListener(this);
+		infiniteQueueClearButton.addActionListener(this);
+		
+		pane_infiniteQueue.add(p_infiniteQueue);
+		pane_infiniteQueue.add(infiniteQueueCalculateButton);
+		pane_infiniteQueue.add(infiniteQueueClearButton);
+		pane_infiniteQueue.add(infiniteQueueOutputPane);
+		infiniteQueueOutputPane.setPreferredSize(new Dimension(285, 150));
 	}
 	
 	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
@@ -486,6 +522,45 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			for(int i = 0; i < p_poisson.getComponentCount()/2; i++)
 				((JTextField)p_poisson.getComponent(i*2 + 1)).setText("");
+		}
+		else if(e.getSource() == infiniteQueueCalculateButton)
+		{
+			ArrayList<Double> parameters = new ArrayList<Double>();
+			boolean allValid = true;
+			for(int i = 0; i < p_infiniteQueue.getComponentCount()/2; i++)
+			{
+				try { parameters.add(Double.parseDouble(((JTextField)p_infiniteQueue.getComponent(i*2 + 1)).getText().trim())); }
+				catch (Exception exception) { allValid = false; }
+			}
+			
+			if(!allValid)
+				JOptionPane.showMessageDialog(this, commonStrings[ERROR_NUMERIC]);
+			else
+			{
+				ArrayList<String> output = Functions.infiniteQueue(parameters);
+				infiniteQueueOutputPanel.removeAll();
+				((GridLayout)infiniteQueueOutputPanel.getLayout()).setRows(output.size());
+				for(int i = 0; i < output.size(); i++)
+				{
+					JLabel jL = new JLabel();
+					jL.setFont(new Font("Arial", Font.PLAIN, 12));
+					jL.setText(" " + output.get(i));
+					infiniteQueueOutputPanel.add(jL);
+				}
+				
+				revalidate();
+				repaint();
+				infiniteQueueOutputPane.getVerticalScrollBar().setValue(infiniteQueueOutputPane.getVerticalScrollBar().getMaximum());
+			}			
+		}
+		else if(e.getSource() == infiniteQueueClearButton)
+		{
+			for(int i = 0; i < p_infiniteQueue.getComponentCount()/2; i++)
+				((JTextField)p_infiniteQueue.getComponent(i*2 + 1)).setText("");
+			
+			infiniteQueueOutputPanel.removeAll();
+			revalidate();
+			repaint();		
 		}
 		else if(e.getSource() == comboBoxes.get(0))
 		{

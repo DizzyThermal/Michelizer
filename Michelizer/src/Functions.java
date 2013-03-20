@@ -32,9 +32,17 @@ public class Functions
 	public static final int K					= 1;
 	public static final int t					= 2;
 	
+	public static final int INFINITE_LAMBDA		= 0;
+	public static final int S0					= 1;
+	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
 															"Random Seek Time", "Service Demand Sequential",
 															"Service Demand"									};
+	
+	public static String[] infiniteQueueOutputStrings   = { "Mu", "P0", "P1", "P2", "Utilization(u)", 
+															"Jobs in System on Average(N)", 
+															"Throughput(X)", "Service Response Time(R)"
+																												};
 
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
 	{
@@ -499,7 +507,40 @@ public class Functions
 		else
 			return "Probability: " + round((Math.exp(-lambda*time)*Math.pow(lambda*time, Integer.parseInt(k))) / factorial(Integer.parseInt(k)));
 	}
-	
+	public static ArrayList<String> infiniteQueue(ArrayList<Double> parameters)
+	{
+		ArrayList<String> output = new ArrayList<String>();
+		
+		double lambda = parameters.get(INFINITE_LAMBDA);
+		double s0		=parameters.get(S0);
+		double mu = 0.0;
+		double p0 = 0.0;
+		double p1 = 0.0;
+		double p2 = 0.0;
+		double u  = 0.0;
+		double n  = 0.0;
+		double x  = 0.0;
+		double r  = 0.0;
+		
+		mu = 1/s0;
+		output.add(infiniteQueueOutputStrings[0] + ": " + round(mu));
+		p0 = 1-(lambda/mu);
+		output.add(infiniteQueueOutputStrings[1] + ": " + round(p0));
+		p1 = p0*(lambda/mu);
+		output.add(infiniteQueueOutputStrings[2] + ": " + round(p1));
+		p2 = p0*Math.pow(lambda/mu, 2);
+		output.add(infiniteQueueOutputStrings[3] + ": " + round(p2));
+		u = (1-p0)*100;
+		output.add(infiniteQueueOutputStrings[4] + ": " + round(u));
+		n = (u/100)/(1-(u/100));
+		output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
+		x = lambda;
+		output.add(infiniteQueueOutputStrings[6] + ": " + round(x));
+		r = 1/(mu - lambda);
+		output.add(infiniteQueueOutputStrings[7] + ": " + round(r));		
+
+		return output;
+	}	
 	public static int factorial(int n)
 	{
 		if (n == 0)
