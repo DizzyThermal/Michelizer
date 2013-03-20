@@ -117,9 +117,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"		};
 	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"		};
 
-	String[] poissonLabelStrings 	= {	"L", "K*", "t" };
+	String[] poissonLabelStrings 	= {	"\u03BB", "K*", "t" };
 	
-	String[] infiniteQueueLabelStrings	= { "Lambda" , "S0" };
+	String[] infiniteQueueLabelStrings	= { "Jobs per Second (\u03BB)" , "S0" };
 	
 	GUI()
 	{

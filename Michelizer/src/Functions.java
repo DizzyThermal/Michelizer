@@ -39,9 +39,9 @@ public class Functions
 															"Random Seek Time", "Service Demand Sequential",
 															"Service Demand"									};
 	
-	public static String[] infiniteQueueOutputStrings   = { "Mu", "P0", "P1", "P2", "Utilization(u)", 
-															"Jobs in System on Average(N)", 
-															"Throughput(X)", "Service Response Time(R)"
+	public static String[] infiniteQueueOutputStrings   = { "\u00B5", "P0", "P1", "P2", "Utilization (U)", 
+															"Jobs in System on Average (N)", 
+															"Throughput (X)", "Service Response Time (R)"
 																												};
 
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
