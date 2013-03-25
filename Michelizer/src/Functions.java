@@ -530,8 +530,8 @@ public class Functions
 		output.add(infiniteQueueOutputStrings[2] + ": " + round(p1));
 		p2 = p0*Math.pow(lambda/mu, 2);
 		output.add(infiniteQueueOutputStrings[3] + ": " + round(p2));
-		u = (1-p0)*100;
-		output.add(infiniteQueueOutputStrings[4] + ": " + round(u));
+		u = (1-p0);
+		output.add(infiniteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
 		n = (u/100)/(1-(u/100));
 		output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
 		x = lambda;
