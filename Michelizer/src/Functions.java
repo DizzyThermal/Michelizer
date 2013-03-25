@@ -532,7 +532,7 @@ public class Functions
 		output.add(infiniteQueueOutputStrings[3] + ": " + round(p2));
 		u = (1-p0);
 		output.add(infiniteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
-		n = (u/100)/(1-(u/100));
+		n = (u)/(1-(u));
 		output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
 		x = lambda;
 		output.add(infiniteQueueOutputStrings[6] + ": " + round(x));
