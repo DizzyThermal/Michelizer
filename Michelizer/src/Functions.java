@@ -37,6 +37,8 @@ public class Functions
 	public static final int MU					= 1;
 	public static final int W					= 2;
 	
+	public static final int LARGE_W				= 3;
+	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
 															"Random Seek Time", "Service Demand Sequential",
 															"Service Demand"									};
@@ -532,9 +534,9 @@ public class Functions
 		else
 			mu = s0;
 
-		String outputLabel = (type == MU)?infiniteQueueOutputStrings[8]:infiniteQueueOutputStrings[0];
-		String outputValue = Double.toString((type == MU)?round(1/mu):round(mu));
-		output.add(outputLabel + ": " + outputValue);
+		output.add(finiteQueueOutputStrings[0] + ": " + round(mu));
+		output.add(finiteQueueOutputStrings[8] + ": " + round(1/mu));
+
 		p0 = 1-(lambda/mu);
 		output.add(infiniteQueueOutputStrings[1] + ": " + round(p0));
 		p1 = p0*(lambda/mu);
@@ -542,7 +544,7 @@ public class Functions
 		p2 = p0*Math.pow(lambda/mu, 2);
 		output.add(infiniteQueueOutputStrings[3] + ": " + round(p2));
 		u = (1-p0);
-		output.add(infiniteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
+		output.add(infiniteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u*100) + "%)");
 		n = (u)/(1-(u));
 		output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
 		x = lambda;
@@ -555,8 +557,7 @@ public class Functions
 	public static ArrayList<String> finiteQueue(ArrayList<Double> parameters, int type)
 	{
 		ArrayList<String> output = new ArrayList<String>();
-		ArrayList<Double> pVals = new ArrayList<Double>();
-		
+	
 		double lambda = parameters.get(INFINITE_LAMBDA);
 		double s0 = parameters.get(S0);
 		double w = parameters.get(W);
@@ -567,30 +568,29 @@ public class Functions
 		else
 			mu = s0;
 
-		String outputLabel = (type == MU)?finiteQueueOutputStrings[8]:finiteQueueOutputStrings[0];
-		String outputValue = Double.toString((type == MU)?round(1/mu):round(mu));
-		output.add(outputLabel + ": " + outputValue);
+		output.add(finiteQueueOutputStrings[0] + ": " + round(mu));
+		output.add(finiteQueueOutputStrings[8] + ": " + round(1/mu));
 
-		double p0 = ((1 - lambda)/(mu))/(Math.pow(((1 - lambda)/(mu)), (w + 1))); //p0 might be wrong!
+		double p0 = (1 - (lambda/mu)) / (1 - Math.pow((lambda/mu), (w+1)));
 		output.add(finiteQueueOutputStrings[1] + ": " + round(p0));
 
-		double sum = 0.0;
-		double currentP = p0;
-		double pNum = 1;
-		while(currentP > 0.01)
-		{
-			currentP = p0*Math.pow((lambda)/(mu), pNum++);
-			sum += currentP;
-			output.add("P" + (int)(pNum-1) + ": " + round(currentP));
-			pVals.add(currentP);
-		}
+		for(int k = 1; k < w+1; k++)
+			output.add("P" + (int)(k) + ": " + round(p0*Math.pow((lambda)/(mu), k)));
 
 		double u = (1-p0);
-		output.add(finiteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
+		output.add(finiteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u*100) + "%)");
 
 		double n = 0.0;
-		for(int k = 0; k < w; k++)
-			n += k*Math.pow((lambda/mu),k);
+		if(w > LARGE_W)
+		{
+			double a = lambda / mu;
+			n = p0*((w*Math.pow(a, w+2))-((w+1)*Math.pow(a, w+1))+(a))/(Math.pow((1-a), 2));
+		}
+		else
+		{
+			for(int k = 0; k < w; k++)
+				n += k*p0*Math.pow((lambda/mu), k);
+		}
 		output.add(finiteQueueOutputStrings[5] + ": " + round(n));
 
 		double x = u*mu;
