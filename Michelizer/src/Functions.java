@@ -589,8 +589,8 @@ public class Functions
 		output.add(finiteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
 
 		double n = 0.0;
-		for(int k = 0; k < pVals.size(); k++)
-			n += pVals.get(k)*k;
+		for(int k = 0; k < w; k++)
+			n += k*Math.pow((lambda/mu),k);
 		output.add(finiteQueueOutputStrings[5] + ": " + round(n));
 
 		double x = u*mu;
