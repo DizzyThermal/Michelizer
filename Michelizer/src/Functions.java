@@ -35,6 +35,7 @@ public class Functions
 	public static final int INFINITE_LAMBDA		= 0;
 	public static final int S0					= 1;
 	public static final int MU					= 1;
+	public static final int W					= 2;
 	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
 															"Random Seek Time", "Service Demand Sequential",
@@ -43,7 +44,11 @@ public class Functions
 	public static String[] infiniteQueueOutputStrings   = { "\u00B5", "P0", "P1", "P2", "Utilization (U)", 
 															"Jobs in System on Average (N)", 
 															"Throughput (X)", "Service Response Time (R)", "S0"	};
-
+	
+	public static String[] finiteQueueOutputStrings		= { "\u00B5", "P0", "P1", "P2", "Utilization (U)", 
+															"Jobs in System on Average (N)", 
+															"Throughput (X)", "Service Response Time (R)", "S0"	};
+	
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
 	{
 		ArrayList<String> output = new ArrayList<String>();
@@ -514,7 +519,6 @@ public class Functions
 		double lambda = parameters.get(INFINITE_LAMBDA);
 		double s0 = parameters.get(S0);
 		double mu = 0.0;
-		double var = 0.0;
 		double p0 = 0.0;
 		double p1 = 0.0;
 		double p2 = 0.0;
@@ -545,6 +549,55 @@ public class Functions
 		output.add(infiniteQueueOutputStrings[6] + ": " + round(x));
 		r = 1/(mu - lambda);
 		output.add(infiniteQueueOutputStrings[7] + ": " + round(r));		
+
+		return output;
+	}
+	public static ArrayList<String> finiteQueue(ArrayList<Double> parameters, int type)
+	{
+		ArrayList<String> output = new ArrayList<String>();
+		ArrayList<Double> pVals = new ArrayList<Double>();
+		
+		double lambda = parameters.get(INFINITE_LAMBDA);
+		double s0 = parameters.get(S0);
+		double w = parameters.get(W);
+
+		double mu = 0.0;
+		if(type != MU)
+			mu = 1/s0;
+		else
+			mu = s0;
+
+		String outputLabel = (type == MU)?finiteQueueOutputStrings[8]:finiteQueueOutputStrings[0];
+		String outputValue = Double.toString((type == MU)?round(1/mu):round(mu));
+		output.add(outputLabel + ": " + outputValue);
+
+		double p0 = ((1 - lambda)/(mu))/(Math.pow(((1 - lambda)/(mu)), (w + 1)));
+		output.add(finiteQueueOutputStrings[1] + ": " + round(p0));
+
+		double sum = 0.0;
+		double currentP = p0;
+		double pNum = 1;
+		while(currentP > 0.0001)
+		{
+			currentP = p0*((lambda)/(mu))*(pNum++);
+			sum += currentP;
+			output.add("P" + (pNum-1) + ": " + currentP);
+			pVals.add(currentP);
+		}
+
+		double u = (1-p0);
+		output.add(finiteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u)*100 + "%)");
+
+		double n = 0.0;
+		for(int k = 0; k < pVals.size(); k++)
+			n += pVals.get(k)*k;
+		output.add(finiteQueueOutputStrings[5] + ": " + round(n));
+
+		double x = u*mu;
+		output.add(finiteQueueOutputStrings[6] + ": " + round(x));
+
+		double r = n/x;
+		output.add(finiteQueueOutputStrings[7] + ": " + round(r));		
 
 		return output;
 	}	
