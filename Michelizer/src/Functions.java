@@ -34,6 +34,7 @@ public class Functions
 	
 	public static final int INFINITE_LAMBDA		= 0;
 	public static final int S0					= 1;
+	public static final int MU					= 1;
 	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
 															"Random Seek Time", "Service Demand Sequential",
@@ -41,8 +42,7 @@ public class Functions
 	
 	public static String[] infiniteQueueOutputStrings   = { "\u00B5", "P0", "P1", "P2", "Utilization (U)", 
 															"Jobs in System on Average (N)", 
-															"Throughput (X)", "Service Response Time (R)"
-																												};
+															"Throughput (X)", "Service Response Time (R)", "S0"	};
 
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
 	{
@@ -507,23 +507,30 @@ public class Functions
 		else
 			return "Probability: " + round((Math.exp(-lambda*time)*Math.pow(lambda*time, Integer.parseInt(k))) / factorial(Integer.parseInt(k)));
 	}
-	public static ArrayList<String> infiniteQueue(ArrayList<Double> parameters)
+	public static ArrayList<String> infiniteQueue(ArrayList<Double> parameters, int type)
 	{
 		ArrayList<String> output = new ArrayList<String>();
 		
 		double lambda = parameters.get(INFINITE_LAMBDA);
-		double s0		=parameters.get(S0);
+		double s0 = parameters.get(S0);
 		double mu = 0.0;
+		double var = 0.0;
 		double p0 = 0.0;
 		double p1 = 0.0;
 		double p2 = 0.0;
-		double u  = 0.0;
-		double n  = 0.0;
-		double x  = 0.0;
-		double r  = 0.0;
+		double u = 0.0;
+		double n = 0.0;
+		double x = 0.0;
+		double r = 0.0;
 		
-		mu = 1/s0;
-		output.add(infiniteQueueOutputStrings[0] + ": " + round(mu));
+		if(type != MU)
+			mu = 1/s0;
+		else
+			mu = s0;
+
+		String outputLabel = (type == MU)?infiniteQueueOutputStrings[8]:infiniteQueueOutputStrings[0];
+		String outputValue = Double.toString((type == MU)?round(1/mu):round(mu));
+		output.add(outputLabel + ": " + outputValue);
 		p0 = 1-(lambda/mu);
 		output.add(infiniteQueueOutputStrings[1] + ": " + round(p0));
 		p1 = p0*(lambda/mu);

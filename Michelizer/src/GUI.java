@@ -119,7 +119,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 
 	String[] poissonLabelStrings 	= {	"\u03BB", "K*", "t" };
 	
-	String[] infiniteQueueLabelStrings	= { "Jobs per Second (\u03BB)" , "S0" };
+	String[] infiniteQueueLabelStrings	= { "Jobs per Second (\u03BB)", "S0", "\u00B5" };
 	
 	GUI()
 	{
@@ -262,14 +262,18 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	public void createPane5()
 	{
-		for(int i = 0; i < infiniteQueueLabelStrings.length; i++)
-		{
-			JLabel jL = new JLabel();
-			jL.setFont(new Font("Arial", Font.PLAIN, 12));
-			jL.setText(infiniteQueueLabelStrings[i] + ":");
-			p_infiniteQueue.add(jL);
-			p_infiniteQueue.add(new JTextField());
-		}
+		JLabel jL = new JLabel();
+		jL.setFont(new Font("Arial", Font.PLAIN, 12));
+		jL.setText(infiniteQueueLabelStrings[0] + ":");
+		p_infiniteQueue.add(jL);
+		p_infiniteQueue.add(new JTextField());
+
+		JComboBox jCB = new JComboBox();
+		jCB.addItem(infiniteQueueLabelStrings[1]);
+		jCB.addItem(infiniteQueueLabelStrings[2]);
+
+		p_infiniteQueue.add(jCB);
+		p_infiniteQueue.add(new JTextField());
 		
 		p_infiniteQueue.setPreferredSize(new Dimension(275, 200));
 		infiniteQueueCalculateButton.addActionListener(this);
@@ -537,7 +541,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 				JOptionPane.showMessageDialog(this, commonStrings[ERROR_NUMERIC]);
 			else
 			{
-				ArrayList<String> output = Functions.infiniteQueue(parameters);
+				ArrayList<String> output = Functions.infiniteQueue(parameters, ((JComboBox)p_infiniteQueue.getComponent(2)).getSelectedIndex());
 				infiniteQueueOutputPanel.removeAll();
 				((GridLayout)infiniteQueueOutputPanel.getLayout()).setRows(output.size());
 				for(int i = 0; i < output.size(); i++)
