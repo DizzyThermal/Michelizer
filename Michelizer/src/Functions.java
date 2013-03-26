@@ -571,17 +571,17 @@ public class Functions
 		String outputValue = Double.toString((type == MU)?round(1/mu):round(mu));
 		output.add(outputLabel + ": " + outputValue);
 
-		double p0 = ((1 - lambda)/(mu))/(Math.pow(((1 - lambda)/(mu)), (w + 1)));
+		double p0 = ((1 - lambda)/(mu))/(Math.pow(((1 - lambda)/(mu)), (w + 1))); //p0 might be wrong!
 		output.add(finiteQueueOutputStrings[1] + ": " + round(p0));
 
 		double sum = 0.0;
 		double currentP = p0;
 		double pNum = 1;
-		while(currentP > 0.0001)
+		while(currentP > 0.01)
 		{
-			currentP = p0*((lambda)/(mu))*(pNum++);
+			currentP = p0*Math.pow((lambda)/(mu), pNum++);
 			sum += currentP;
-			output.add("P" + (pNum-1) + ": " + currentP);
+			output.add("P" + (int)(pNum-1) + ": " + round(currentP));
 			pVals.add(currentP);
 		}
 
