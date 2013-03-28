@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -589,10 +591,21 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			ArrayList<Double> parameters = new ArrayList<Double>();
 			boolean allValid = true;
+			
+			ScriptEngineManager mgr = new ScriptEngineManager();
+			ScriptEngine engine = mgr.getEngineByName("JavaScript");
 			for(int i = 0; i < p_infiniteQueue.getComponentCount()/2; i++)
 			{
 				try { parameters.add(Double.parseDouble(((JTextField)p_infiniteQueue.getComponent(i*2 + 1)).getText().trim())); }
-				catch (Exception exception) { allValid = false; }
+				catch (Exception exception)
+				{
+					try
+					{
+						double val = (double)engine.eval(((JTextField)p_infiniteQueue.getComponent(i*2 + 1)).getText());
+						parameters.add(val);
+					}
+					catch (ScriptException sException) { allValid = false; }
+				}
 			}
 			
 			if(!allValid)
@@ -633,10 +646,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		{
 			ArrayList<Double> parameters = new ArrayList<Double>();
 			boolean allValid = true;
+			ScriptEngineManager mgr = new ScriptEngineManager();
+			ScriptEngine engine = mgr.getEngineByName("JavaScript");
 			for(int i = 0; i < p_finiteQueue.getComponentCount()/2; i++)
 			{
 				try { parameters.add(Double.parseDouble(((JTextField)p_finiteQueue.getComponent(i*2 + 1)).getText().trim())); }
-				catch (Exception exception) { allValid = false; }
+				catch (Exception exception)
+				{
+					try
+					{
+						double val = (double)engine.eval(((JTextField)p_finiteQueue.getComponent(i*2 + 1)).getText());
+						parameters.add(val);
+					}
+					catch(ScriptException sException) { allValid = false; }
+				}
 			}
 			
 			if(!allValid)

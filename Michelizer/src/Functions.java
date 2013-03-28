@@ -538,19 +538,35 @@ public class Functions
 		output.add(finiteQueueOutputStrings[8] + ": " + round(1/mu));
 
 		p0 = 1-(lambda/mu);
+		if(p0 < 0)
+			p0 = 0;
 		output.add(infiniteQueueOutputStrings[1] + ": " + round(p0));
 		p1 = p0*(lambda/mu);
+		if(p1 < 0)
+			p1 = 0;
 		output.add(infiniteQueueOutputStrings[2] + ": " + round(p1));
 		p2 = p0*Math.pow(lambda/mu, 2);
+		if(p2 < 0)
+			p2 = 0;
 		output.add(infiniteQueueOutputStrings[3] + ": " + round(p2));
 		u = (1-p0);
 		output.add(infiniteQueueOutputStrings[4] + ": " + round(u) + " (" + round(u*100) + "%)");
-		n = (u)/(1-(u));
-		output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
+		if(u >= 1)
+			output.add(infiniteQueueOutputStrings[5] + ": " + "\u221E");
+		else
+		{
+			n = (u)/(1-(u));
+			output.add(infiniteQueueOutputStrings[5] + ": " + round(n));
+		}
 		x = lambda;
 		output.add(infiniteQueueOutputStrings[6] + ": " + round(x));
-		r = 1/(mu - lambda);
-		output.add(infiniteQueueOutputStrings[7] + ": " + round(r));		
+		if((u >= 1) || (mu == lambda))
+			output.add(infiniteQueueOutputStrings[7] + ": " + "\u221E");
+		else
+		{
+			r = 1/(mu - lambda);
+			output.add(infiniteQueueOutputStrings[7] + ": " + round(r));
+		}
 
 		return output;
 	}
