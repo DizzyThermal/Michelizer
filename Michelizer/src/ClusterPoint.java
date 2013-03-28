@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class Point
+public class ClusterPoint
 {
 	private ArrayList<Double> dimensions = new ArrayList<Double>();
 	
@@ -20,7 +20,7 @@ public class Point
 		return pointStr.substring(0, pointStr.length() - 3);	// Trim last comma and space ( -3 )
 	}
 	
-	public boolean isEqual(Point p)
+	public boolean isEqual(ClusterPoint p)
 	{
 		if(dimensions.size() != p.getDimensionSize())
 			return false;

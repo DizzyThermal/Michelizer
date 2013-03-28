@@ -3,8 +3,13 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -13,6 +18,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,7 +32,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class GUI extends JFrame implements ChangeListener, ActionListener
+public class GUI extends JFrame implements ChangeListener, ActionListener, KeyListener
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,6 +41,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	private static final int COMP_COMPLETE		= 0;
 	private static final int ERROR_NUMERIC		= 1;
+	private static final int WARNING_OVERWRITE	= 2;
 	
 	private static final int DISK_NOTE			= 0;
 	private static final int DISK_DATA_ERROR	= 1;
@@ -41,7 +49,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 	
 	// Message Strings
 	String[] commonStrings = {	"Computation Completed Successfully!",
-								"Error: All Values MUST be Numeric!"	};
+								"Error: All Values MUST be Numeric!",
+								"File Exists!\n\nOverwrite?"};
 
 	String DoubleWarning = "One or more entries were not numeric!  Reset to \"0.0\", be careful next time!";
 	String poissonNote = "*For a K Range, put '..' between two integers";
@@ -159,6 +168,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		jTP.addTab("Disk Access Time", pane_diskAccessTime);
 		add(jTP);
 		jTP.setSelectedIndex(3);
+		recursivelyAddKeyListener((JComponent)((JComponent)((JComponent)this.getComponent(0)).getComponent(1)).getComponent(0));
 	}
 	
 	public void createPane1()
@@ -391,14 +401,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		return pointPanel.getComponentCount() / dimToUse - 1;
 	}
 	
-	public ArrayList<Point> getPointsFromGUI(int dimensionCount)
+	public ArrayList<ClusterPoint> getPointsFromGUI(int dimensionCount)
 	{
-		ArrayList<Point> points = new ArrayList<Point>();
+		ArrayList<ClusterPoint> points = new ArrayList<ClusterPoint>();
 		boolean someValuesReset = false;
 
 		for(int i = 1; i <= getGUIPointCount(dimensionCount); i++) // Line to Check
 		{
-			Point p = new Point();
+			ClusterPoint p = new ClusterPoint();
 			for(int j = 0; j < dimensionCount; j++)
 			{
 				String val = ((JTextField)pointPanel.getComponent((i*dimensionCount) + j)).getText().trim();
@@ -427,7 +437,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		return points;
 	}
 
-	public ArrayList<String> getDimensionsFromPoints(ArrayList<Point> p)
+	public ArrayList<String> getDimensionsFromPoints(ArrayList<ClusterPoint> p)
 	{
 		ArrayList<String> pointDimensionValues = new ArrayList<String>();
 		for(int i = 0; i < p.size(); i++)
@@ -536,7 +546,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 		}
 		else if(e.getSource() == clusteringCalculateButton)
 		{
-			ArrayList<Point> points = getPointsFromGUI(dimensionCount);
+			ArrayList<ClusterPoint> points = getPointsFromGUI(dimensionCount);
 			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
@@ -708,4 +718,58 @@ public class GUI extends JFrame implements ChangeListener, ActionListener
 			}
 		}
 	}
+	
+	public void createScreenShot()
+	{
+		File screenshotFile = null;
+		JFileChooser chooser = new JFileChooser();
+		chooser.setSelectedFile(new File("Michelizer_Output.jpg"));
+		screenshotFile = chooser.getSelectedFile();
+	
+		if(JFileChooser.APPROVE_OPTION == chooser.showSaveDialog(this))
+		{
+			screenshotFile = chooser.getSelectedFile();
+			if(screenshotFile.exists())
+			{
+				int counter = 1;
+				while(screenshotFile.exists())
+					screenshotFile = new File(screenshotFile.getAbsolutePath().substring(0, (screenshotFile.getAbsolutePath().length()-screenshotFile.getPath().length())) + "Michelizer_Output (" + (counter++) + ").jpg");
+			}
+			
+			try
+			{
+				Rectangle r = new Rectangle(getX(), getY(), getWidth(), getHeight());
+				BufferedImage bi = ScreenImage.createImage(r);
+				ScreenImage.writeImage(bi, screenshotFile.getAbsolutePath());
+			}
+			catch(Exception exception) { exception.printStackTrace(); }
+		}
+	}
+	
+	public void recursivelyAddKeyListener(JComponent jC)
+	{
+		if(jC == null)
+			return;
+		
+		for(int i = 0; i < jC.getComponentCount(); i++)
+		{
+			if((jC instanceof JPanel) || (jC instanceof JTabbedPane) || (jC instanceof JScrollPane))
+				((JComponent)jC.getComponent(i)).addKeyListener(this);
+			else
+				break;
+			recursivelyAddKeyListener((JComponent)jC.getComponent(i));
+		}
+	}
+	
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if(e.isControlDown() && e.getKeyChar() != 's' && e.getKeyCode() == KeyEvent.VK_S)
+			createScreenShot();
+	}
+	
+	@Override
+	public void keyTyped(KeyEvent e) {}
+	@Override
+	public void keyReleased(KeyEvent e) {}
 }

@@ -82,7 +82,7 @@ public class Functions
 		return Double.valueOf(new DecimalFormat("#.###").format(value));
 	}
 	
-	public static double getDistance(Point p1, Point p2, int distanceType)
+	public static double getDistance(ClusterPoint p1, ClusterPoint p2, int distanceType)
 	{
 		double sum = 0.0;
 
@@ -118,7 +118,7 @@ public class Functions
 		return "Average Disk Access Time: " + round(((avgDiskAccessTime + diskAccessTime)/((double)locations.size()))) + " ms";
 	}
 	
-	public static boolean MST(ArrayList<Point> points, int numOfClusters, int distanceType) throws IOException
+	public static boolean MST(ArrayList<ClusterPoint> points, int numOfClusters, int distanceType) throws IOException
 	{
 		int dataHeight = 0;
 		int dataWidth = points.size() + 1;
@@ -227,7 +227,7 @@ public class Functions
 		return true;
 	}
 	
-	public static boolean K_Means(ArrayList<Point> points, int numberOfClusters, int distanceType) throws IOException
+	public static boolean K_Means(ArrayList<ClusterPoint> points, int numberOfClusters, int distanceType) throws IOException
 	{
 		ArrayList<String[]> listData = new ArrayList<String[]>();
 		String[] tempData = new String[points.size() + 1];
@@ -388,7 +388,7 @@ public class Functions
 		return true;
 	}
 	
-	public static boolean Z_Score(ArrayList<Point> points) throws IOException
+	public static boolean Z_Score(ArrayList<ClusterPoint> points) throws IOException
 	{
 		int dataHeight = 0;
 		int dataWidth = points.get(0).getDimensionSize();
