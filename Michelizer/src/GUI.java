@@ -1,9 +1,15 @@
+import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -29,6 +35,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -723,17 +731,28 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	{
 		File screenshotFile = null;
 		JFileChooser chooser = new JFileChooser();
+		UIManager.put("FileChooser.saveDialogTitleText", "Save Michelizer Screenshot");
+		SwingUtilities.updateComponentTreeUI(chooser);
 		chooser.setSelectedFile(new File("Michelizer_Output.jpg"));
+
 		screenshotFile = chooser.getSelectedFile();
 	
 		if(JFileChooser.APPROVE_OPTION == chooser.showSaveDialog(this))
 		{
+			// Wait for JFileChooser to close!
+			try { Thread.sleep(750); }
+			catch (InterruptedException ie) { ie.printStackTrace(); }
+
 			screenshotFile = chooser.getSelectedFile();
+			String path = screenshotFile.getAbsolutePath().substring(0, screenshotFile.getAbsolutePath().length() - screenshotFile.getName().length());
+			String fileName = screenshotFile.getName().substring(0, screenshotFile.getName().length()-4);
+			String extension = ".jpg";
+
 			if(screenshotFile.exists())
 			{
 				int counter = 1;
 				while(screenshotFile.exists())
-					screenshotFile = new File(screenshotFile.getAbsolutePath().substring(0, (screenshotFile.getAbsolutePath().length()-screenshotFile.getPath().length())) + "Michelizer_Output (" + (counter++) + ").jpg");
+					screenshotFile = new File(path + fileName + " (" + counter++ + ")" + extension);
 			}
 			
 			try
@@ -745,6 +764,50 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			catch(Exception exception) { exception.printStackTrace(); }
 		}
 	}
+	
+	public void copyScreenShot()
+	{
+		Rectangle r = new Rectangle(getX(), getY(), getWidth(), getHeight());
+		Image image = null;
+		try { image = ScreenImage.createImage(r); }
+		catch(AWTException awte) { awte.printStackTrace(); }
+
+		ImageTransferable transferable = new ImageTransferable( image );
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, null);
+	}
+	
+	static class ImageTransferable implements Transferable
+    {
+        private Image image;
+
+        public ImageTransferable (Image image)
+        {
+            this.image = image;
+        }
+
+        public Object getTransferData(DataFlavor flavor)
+            throws UnsupportedFlavorException
+        {
+            if (isDataFlavorSupported(flavor))
+            {
+                return image;
+            }
+            else
+            {
+                throw new UnsupportedFlavorException(flavor);
+            }
+        }
+
+        public boolean isDataFlavorSupported (DataFlavor flavor)
+        {
+            return flavor == DataFlavor.imageFlavor;
+        }
+
+        public DataFlavor[] getTransferDataFlavors ()
+        {
+            return new DataFlavor[] { DataFlavor.imageFlavor };
+        }
+    }
 	
 	public void recursivelyAddKeyListener(JComponent jC)
 	{
@@ -766,6 +829,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	{
 		if(e.isControlDown() && e.getKeyChar() != 's' && e.getKeyCode() == KeyEvent.VK_S)
 			createScreenShot();
+		else if(e.isControlDown() && e.getKeyChar() != 'c' && e.getKeyCode() == KeyEvent.VK_C)
+			copyScreenShot();
 	}
 	
 	@Override
