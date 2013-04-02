@@ -98,7 +98,11 @@ public class SpreadSheet extends JPanel implements KeyListener
 	
 	public void copyScreenShot()
 	{
-		Rectangle r = new Rectangle(getX(), getY(), getWidth(), getHeight());
+		JComponent j = jT;
+		while(!(j.getParent() instanceof JFrame))
+			j = (JComponent)j.getParent();
+		
+		Rectangle r = new Rectangle(j.getParent().getX(), j.getParent().getY(), jT.getWidth(), jT.getHeight());
 		Image image = null;
 		try { image = ScreenImage.createImage(r); }
 		catch(AWTException awte) { awte.printStackTrace(); }
