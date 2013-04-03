@@ -37,6 +37,10 @@ public class Functions
 	public static final int MU					= 1;
 	public static final int W					= 2;
 	
+	public static final int csMU				= 0;
+	public static final int M					= 1;
+	public static final int Z					= 2;
+	
 	public static final int LARGE_W				= 3;
 	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
@@ -615,6 +619,25 @@ public class Functions
 		double r = n/x;
 		output.add(finiteQueueOutputStrings[7] + ": " + round(r));		
 
+		return output;
+	}	
+	public static ArrayList<String> closedSystem(ArrayList<Double> parameters, int type)
+	{
+		ArrayList<String> output = new ArrayList<String>();
+	
+		double mu = parameters.get(csMU);
+		double m = parameters.get(M);
+		double z = parameters.get(Z);
+
+		double s0 = 0.0;
+		if(type != MU)
+			s0 = mu;
+		else
+			s0 = 1/mu;
+
+		// This needs to be done, put into "output" and returned..
+		// Checkout finiteQueue and infiniteQueue
+		
 		return output;
 	}	
 	public static int factorial(int n)
