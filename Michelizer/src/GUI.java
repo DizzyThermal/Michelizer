@@ -86,7 +86,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
 	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel p_queue = new JPanel(new GridLayout(9,1));
-	JPanel p_closedSystem = new JPanel(new GridLayout(9,1));
+	JPanel p_closedSystem = new JPanel(new GridLayout(4,1));
 	
 	JPanel p_infiniteQueue = new JPanel(new GridLayout(9,1));
 	JPanel p_finiteQueue = new JPanel(new GridLayout(9,1));
@@ -335,7 +335,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			p_closedSystem.add(jTF);
 		}
 		
-		p_closedSystem.setPreferredSize(new Dimension(275, 200));
+		p_closedSystem.setPreferredSize(new Dimension(275, 85));
 		closedSystemCalculateButton.addActionListener(this);
 		closedSystemClearButton.addActionListener(this);
 		
@@ -343,7 +343,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		pane_closedSystem.add(closedSystemCalculateButton);
 		pane_closedSystem.add(closedSystemClearButton);
 		pane_closedSystem.add(closedSystemOutputPane);
-		closedSystemOutputPane.setPreferredSize(new Dimension(285, 175));
+		closedSystemOutputPane.setPreferredSize(new Dimension(285, 300));
 	}
 	
 	public void createInfiniteQueuePane()
