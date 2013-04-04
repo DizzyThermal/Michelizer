@@ -40,6 +40,10 @@ public class Functions
 	public static final int csMU				= 0;
 	public static final int Z					= 1;
 	
+	public static final int gsK					= 0;
+	public static final int gsL					= 1;
+	public static final int gsM					= 2;
+	
 	public static final int LARGE_W				= 3;
 	
 	public static String[] serviceDemandOutputStrings	= {	"Service Demand Random", "Utilization",
@@ -53,6 +57,15 @@ public class Functions
 	public static String[] finiteQueueOutputStrings		= { "\u00B5", "P0", "P1", "P2", "Utilization (U)", 
 															"Jobs in System on Average (N)", 
 															"Throughput (X)", "Service Response Time (R)", "S0"	};
+
+	public static String[] closedSystemOutputStrings	= {	"Job Rate (z)", "Process Time", "\u03BB",
+															"\u03BC", "P", "Utilization (u)", "Average Length of Queue (N)",
+															"Throughput (X)", "Response Time (R)" 				};
+	
+	public static String[] generalSystemOutputStrings	= {	"Number of Terms (k)", "\u03BB",
+															"\u00B5", "P", "Utilization (u)",
+															"Average Length of Queue (N)", "Throughput (X)",
+															"Response Time (R)" 								};
 	
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
 	{
@@ -665,23 +678,87 @@ public class Functions
 		}
 		double r = n/x;
 		
-		output.add("Job Rate (z): " + round(z));
+		output.add(closedSystemOutputStrings[0] + ": " + round(z));
 		for(int i = 0; i < processTimes.length; i++)
-			output.add("Process Time " + (i+1) + ": " + round(Double.parseDouble(processTimes[i])));
+			output.add(closedSystemOutputStrings[1] + ": " + (i+1) + ": " + round(Double.parseDouble(processTimes[i])));
 		for(int i = 0; i < lambdas.size(); i++)
-			output.add("\u03BB" + (i) + ": " + round(lambdas.get(i)));
+			output.add(closedSystemOutputStrings[2] + (i) + ": " + round(lambdas.get(i)));
 		for(int i = 0; i < mus.size(); i++)
-			output.add("\u03BC" + (i+1) + ": " + round(mus.get(i)));
-		output.add("P0: " + round(p0));
+			output.add(closedSystemOutputStrings[3] + (i+1) + ": " + round(mus.get(i)));
+		output.add(closedSystemOutputStrings[4] + "0: " + round(p0));
 		for(int i = 0; i < pks.size(); i++)
-			output.add("P" + (i+1) + ": " + round(pks.get(i)));
-		output.add("Utilization (u): " + round(u) + " (" + round(u*100) + "%)");
-		output.add("Average Length of Queue (N): " + round(n));
-		output.add("Throughput (X): " + round(x));
-		output.add("Response Time (R): " + round(r));
+			output.add(closedSystemOutputStrings[4] + (i+1) + ": " + round(pks.get(i)));
+		output.add(closedSystemOutputStrings[5] + ": " + round(u) + " (" + round(u*100) + "%)");
+		output.add(closedSystemOutputStrings[6] + ": " + round(n));
+		output.add(closedSystemOutputStrings[7] + ": " + round(x));
+		output.add(closedSystemOutputStrings[8] + ": " + round(r));
 		
 		return output;
-	}	
+	}
+	public static ArrayList<String> generalSystem(ArrayList<Object> parameters)
+	{
+		ArrayList<String> output = new ArrayList<String>();
+
+		String[] iLams = ((String)parameters.get(gsL)).split(",");
+		String[] iMus = ((String)parameters.get(gsM)).split(",");
+		
+		ArrayList<Double> lambdas = new ArrayList<Double>();
+		ArrayList<Double> mus = new ArrayList<Double>();
+
+		for(int i = 0; i < iLams.length; i++)
+		{
+			lambdas.add(Double.parseDouble(iLams[i].trim()));
+			mus.add(Double.parseDouble(iMus[i].trim()));
+		}
+		double k = (Double)parameters.get(gsK);
+		
+		while(lambdas.size() != k)
+			lambdas.add(lambdas.get(0));
+		while(mus.size() != k)
+			mus.add(mus.get(0));		
+
+		ArrayList<Double> coefficients = new ArrayList<Double>();
+		ArrayList<Double> pks = new ArrayList<Double>();
+		
+		coefficients.add(lambdas.get(0)/mus.get(0));
+		double sum = 1 + coefficients.get(0);
+		for(int i = 1; i < k-1; i++)
+		{
+			coefficients.add(coefficients.get(i-1)* (lambdas.get(i)/mus.get(i)));
+			sum += coefficients.get(i);
+		}
+		
+		double p0 = 1/sum;
+		
+		pks.add((lambdas.get(0)/mus.get(0)) * p0);
+		for(int i = 1; i < k; i++)
+			pks.add((lambdas.get(i)/mus.get(i)) * pks.get(i-1));
+		
+		double u = 1 - p0;
+		double n = 0.0;
+		double x = 0.0;
+		for(int i = 0; i < pks.size(); i++)
+		{
+			n += ((i+1)*pks.get(i));
+			x += (mus.get(i)*pks.get(i));
+		}
+		double r = n/x;
+		
+		output.add(generalSystemOutputStrings[0] + ": " + round(k));
+		for(int i = 0; i < lambdas.size(); i++)
+			output.add(generalSystemOutputStrings[1] + i + ": " + round(lambdas.get(i)));
+		for(int i = 0; i < mus.size(); i++)
+			output.add(generalSystemOutputStrings[2] + (i+1) + ": " + round(mus.get(i)));
+		output.add(generalSystemOutputStrings[3] + "0: " + round(p0));
+		for(int i = 0; i < pks.size(); i++)
+			output.add(generalSystemOutputStrings[3] + (i+1) + ": " + round(pks.get(i)));
+		output.add(generalSystemOutputStrings[4] + ": " + round(u) + " (" + round(u*100) + "%)");
+		output.add(generalSystemOutputStrings[5] + ": " + round(n));
+		output.add(generalSystemOutputStrings[6] + ": " + round(x));
+		output.add(generalSystemOutputStrings[7] + ": " + round(r));
+		
+		return output;
+	}
 	public static int factorial(int n)
 	{
 		if (n == 0)

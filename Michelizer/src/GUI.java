@@ -33,7 +33,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -74,11 +76,15 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	JPanel pane_clustering = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel pane_poisson = new JPanel(new FlowLayout());
 	JPanel pane_queue = new JPanel(new FlowLayout());
-	JPanel pane_closedSystem = new JPanel(new FlowLayout());
+	JPanel pane_systems = new JPanel(new FlowLayout());
 	
 	JTabbedPane jTPQueue = new JTabbedPane();
 	JPanel pane_infiniteQueue = new JPanel(new FlowLayout());
 	JPanel pane_finiteQueue = new JPanel(new FlowLayout());
+	
+	JTabbedPane jTPSystems = new JTabbedPane();
+	JPanel pane_closedSystem = new JPanel(new FlowLayout());
+	JPanel pane_generalSystem = new JPanel(new FlowLayout());
 	
 	// GUI Panels
 	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
@@ -86,18 +92,17 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
 	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel p_queue = new JPanel(new GridLayout(9,1));
-	JPanel p_closedSystem = new JPanel(new GridLayout(4,1));
+	JPanel p_systems = new JPanel(new GridLayout(4,1));
 	
-	JPanel p_infiniteQueue = new JPanel(new GridLayout(9,1));
-	JPanel p_finiteQueue = new JPanel(new GridLayout(9,1));
+	JPanel p_infiniteQueue = new JPanel(new GridLayout(4,1));
+	JPanel p_finiteQueue = new JPanel(new GridLayout(6,1));
+	
+	JPanel p_closedSystem = new JPanel(new GridLayout(4,1));
+	JPanel p_generalSystem = new JPanel(new GridLayout(4,1));
 	
 	// Point Field
 	JPanel pointPanel = new JPanel(new GridLayout(5,3));
 	JScrollPane pointScrollPane = new JScrollPane(pointPanel);
-	
-	// Service Demand Output
-	JPanel serviceDemandOutputPanel = new JPanel(new GridLayout(8,1));
-	JScrollPane serviceDemandOutputPane = new JScrollPane(serviceDemandOutputPanel);
 
 	// Service Demand Button Panel and Buttons
 	JButton serviceDemandCalculateButton = new JButton("Calculate");
@@ -131,17 +136,24 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	JButton closedSystemCalculateButton = new JButton("Calculate");
 	JButton closedSystemClearButton = new JButton("Clear");
 	
+	// Closed System Button Panel and Buttons
+	JButton generalSystemCalculateButton = new JButton("Calculate");
+	JButton generalSystemClearButton = new JButton("Clear");
+	
+	// Service Demand Output
+	JScrollPane serviceDemandOutputPane = new JScrollPane(new JTextArea());
+	
 	// Infinite Queue Output
-	JPanel infiniteQueueOutputPanel = new JPanel(new GridLayout(8,1));
-	JScrollPane infiniteQueueOutputPane = new JScrollPane(infiniteQueueOutputPanel);
+	JScrollPane infiniteQueueOutputPane = new JScrollPane(new JTextArea());
 	
 	// Finite Queue Output
-	JPanel finiteQueueOutputPanel = new JPanel(new GridLayout(8,1));
-	JScrollPane finiteQueueOutputPane = new JScrollPane(finiteQueueOutputPanel);
+	JScrollPane finiteQueueOutputPane = new JScrollPane(new JTextArea());
 	
-	// Finite Queue Output
-	JPanel closedSystemOutputPanel = new JPanel(new GridLayout(8,1));
-	JScrollPane closedSystemOutputPane = new JScrollPane(closedSystemOutputPanel);
+	// Closed System Output
+	JScrollPane closedSystemOutputPane = new JScrollPane(new JTextArea());
+	
+	// General System Output
+	JScrollPane generalSystemOutputPane = new JScrollPane(new JTextArea());
 	
 	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
@@ -152,21 +164,24 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			"Block Size (Bytes)", "Run Length",
 			"RPM", "Seek-Random (ms)",
 			"Transfer Rate (MB/s", "Controller Time (ms)",
-			"Iterations"									};
+			"Iterations"																};
 	
-	String[] diskAccessTimeLabelStrings = { "Data Locations*", "Seek Random Time (ms)" };
+	String[] diskAccessTimeLabelStrings = { "Data Locations*", "Seek Random Time (ms)" 	};
 	
 	String[] clusteringLabelStrings 	= {	"Algorithm", "Distance Type",
-											"Dimensions", "Clusters"		};
-	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"		};
-	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"		};
+											"Dimensions", "Clusters"					};
+	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"					};
+	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"					};
 
 	String[] poissonLabelStrings 	= {	"\u03BB", "K*", "t" };
 
 	String[] queueLabelStrings	= { "Jobs per Second (\u03BB)",
-									"S0", "\u00B5", "w"						};
+									"S0", "\u00B5", "w"									};
 	
-	String[] closedSystemStrings = { "Process Time(s)", "Job Rate (z)" };
+	String[] closedSystemStrings = { "Process Time(s)", "Job Rate (z)" 					};
+	
+	String[] generalSystemStrings = {	"Number of Terms (k)", "Arrival Rate (\u03BB)",
+										"Service Rate (\u00B5)" 						};
 	
 	GUI()
 	{
@@ -185,7 +200,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		jTP.setPreferredSize(new Dimension(300, 480));
 		jTP.addTab("Queues", pane_queue);
 		jTP.addTab("Service Demand", pane_serviceDemand);
-		jTP.addTab("Closed System", pane_closedSystem);
+		jTP.addTab("Systems", pane_systems);
 		jTP.addTab("Poisson", pane_poisson);
 		jTP.addTab("Disk Access Time", pane_diskAccessTime);
 		jTP.addTab("Clustering", pane_clustering);
@@ -213,7 +228,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		pane_serviceDemand.add(serviceDemandCalculateButton);
 		pane_serviceDemand.add(serviceDemandClearButton);
 		pane_serviceDemand.add(serviceDemandOutputPane);
-		serviceDemandOutputPane.setPreferredSize(new Dimension(285, 150));
+		serviceDemandOutputPane.setPreferredSize(new Dimension(285, 185));
+		((JTextArea)((JViewport)serviceDemandOutputPane.getComponent(0)).getView()).setEditable(false);
 	}
 	
 	public void createPane2()
@@ -323,27 +339,13 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	
 	public void createPane6()
 	{
-		for(int i = 0; i < closedSystemStrings.length; i++)
-		{
-			JLabel jL = new JLabel();
-			jL.setFont(new Font("Arial", Font.PLAIN, 12));
-			jL.setText(closedSystemStrings[i] + ":");
-			jL.setPreferredSize(new Dimension(22, 25));
-			JTextField jTF = new JTextField();
-			jTF.setPreferredSize(new Dimension(175, 25));
-			p_closedSystem.add(jL);
-			p_closedSystem.add(jTF);
-		}
+		createClosedSystemPane();
+		createGeneralSystemPane();
 		
-		p_closedSystem.setPreferredSize(new Dimension(275, 85));
-		closedSystemCalculateButton.addActionListener(this);
-		closedSystemClearButton.addActionListener(this);
-		
-		pane_closedSystem.add(p_closedSystem);
-		pane_closedSystem.add(closedSystemCalculateButton);
-		pane_closedSystem.add(closedSystemClearButton);
-		pane_closedSystem.add(closedSystemOutputPane);
-		closedSystemOutputPane.setPreferredSize(new Dimension(285, 300));
+		jTPSystems.setPreferredSize(new Dimension(290, 420));
+		jTPSystems.addTab("Closed", pane_closedSystem);
+		jTPSystems.addTab("General", pane_generalSystem);
+		pane_systems.add(jTPSystems);
 	}
 	
 	public void createInfiniteQueuePane()
@@ -361,7 +363,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		p_infiniteQueue.add(jCB);
 		p_infiniteQueue.add(new JTextField());
 		
-		p_infiniteQueue.setPreferredSize(new Dimension(275, 200));
+		p_infiniteQueue.setPreferredSize(new Dimension(275, 90));
 		infiniteQueueCalculateButton.addActionListener(this);
 		infiniteQueueClearButton.addActionListener(this);
 		
@@ -369,7 +371,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		pane_infiniteQueue.add(infiniteQueueCalculateButton);
 		pane_infiniteQueue.add(infiniteQueueClearButton);
 		pane_infiniteQueue.add(infiniteQueueOutputPane);
-		infiniteQueueOutputPane.setPreferredSize(new Dimension(285, 150));
+		infiniteQueueOutputPane.setPreferredSize(new Dimension(285, 255));
+		((JTextArea)((JViewport)infiniteQueueOutputPane.getComponent(0)).getView()).setEditable(false);
 	}
 	
 	public void createFiniteQueuePane()
@@ -393,7 +396,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		p_finiteQueue.add(jL2);
 		p_finiteQueue.add(new JTextField());
 		
-		p_finiteQueue.setPreferredSize(new Dimension(275, 200));
+		p_finiteQueue.setPreferredSize(new Dimension(275, 135));
 		finiteQueueCalculateButton.addActionListener(this);
 		finiteQueueClearButton.addActionListener(this);
 		
@@ -401,7 +404,60 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		pane_finiteQueue.add(finiteQueueCalculateButton);
 		pane_finiteQueue.add(finiteQueueClearButton);
 		pane_finiteQueue.add(finiteQueueOutputPane);
-		finiteQueueOutputPane.setPreferredSize(new Dimension(285, 150));
+		finiteQueueOutputPane.setPreferredSize(new Dimension(285, 210));
+		((JTextArea)((JViewport)finiteQueueOutputPane.getComponent(0)).getView()).setEditable(false);
+	}
+	
+	public void createClosedSystemPane()
+	{
+		for(int i = 0; i < closedSystemStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 12));
+			jL.setText(closedSystemStrings[i] + ":");
+			jL.setPreferredSize(new Dimension(22, 25));
+			JTextField jTF = new JTextField();
+			jTF.setPreferredSize(new Dimension(175, 25));
+			p_closedSystem.add(jL);
+			p_closedSystem.add(jTF);
+		}
+		
+		p_closedSystem.setPreferredSize(new Dimension(275, 85));
+		closedSystemCalculateButton.addActionListener(this);
+		closedSystemClearButton.addActionListener(this);
+		
+		pane_closedSystem.add(p_closedSystem);
+		pane_closedSystem.add(closedSystemCalculateButton);
+		pane_closedSystem.add(closedSystemClearButton);
+		pane_closedSystem.add(closedSystemOutputPane);
+		closedSystemOutputPane.setPreferredSize(new Dimension(285, 265));
+		((JTextArea)((JViewport)closedSystemOutputPane.getComponent(0)).getView()).setEditable(false);
+	}
+	
+	public void createGeneralSystemPane()
+	{
+		for(int i = 0; i < generalSystemStrings.length; i++)
+		{
+			JLabel jL = new JLabel();
+			jL.setFont(new Font("Arial", Font.PLAIN, 12));
+			jL.setText(generalSystemStrings[i] + ":");
+			jL.setPreferredSize(new Dimension(22, 25));
+			JTextField jTF = new JTextField();
+			jTF.setPreferredSize(new Dimension(175, 25));
+			p_generalSystem.add(jL);
+			p_generalSystem.add(jTF);
+		}
+		
+		p_generalSystem.setPreferredSize(new Dimension(275, 85));
+		generalSystemCalculateButton.addActionListener(this);
+		generalSystemClearButton.addActionListener(this);
+		
+		pane_generalSystem.add(p_generalSystem);
+		pane_generalSystem.add(generalSystemCalculateButton);
+		pane_generalSystem.add(generalSystemClearButton);
+		pane_generalSystem.add(generalSystemOutputPane);
+		generalSystemOutputPane.setPreferredSize(new Dimension(285, 265));
+		((JTextArea)((JViewport)generalSystemOutputPane.getComponent(0)).getView()).setEditable(false);
 	}
 	
 	public void updateScrollPane(int points, int dimensions, ArrayList<String> savedPoints)
@@ -542,15 +598,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			else
 			{
 				ArrayList<String> output = Functions.serviceDemand(parameters);
-				serviceDemandOutputPanel.removeAll();
-				((GridLayout)serviceDemandOutputPanel.getLayout()).setRows(output.size());
-				for(int i = 0; i < output.size(); i++)
-				{
-					JLabel jL = new JLabel();
-					jL.setFont(new Font("Arial", (output.get(i).charAt(14) == ':')?Font.BOLD:Font.PLAIN, 12));
-					jL.setText(" " + output.get(i));
-					serviceDemandOutputPanel.add(jL);
-				}
+				((JTextArea)((JViewport)serviceDemandOutputPane.getComponent(0)).getView()).setEditable(false);
+				((JTextArea)((JViewport)serviceDemandOutputPane.getComponent(0)).getView()).setText(output.get(0) + "\n");
+				for(int i = 1; i < output.size(); i++)
+					((JTextArea)((JViewport)serviceDemandOutputPane.getComponent(0)).getView()).append(output.get(i) + "\n");
 				
 				revalidate();
 				repaint();
@@ -562,7 +613,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			for(int i = 0; i < p_serviceDemand.getComponentCount()/2; i++)
 				((JTextField)p_serviceDemand.getComponent(i*2 + 1)).setText("");
 			
-			serviceDemandOutputPanel.removeAll();
+			((JTextArea)((JViewport)serviceDemandOutputPane.getComponent(0)).getView()).setText("");
 			revalidate();
 			repaint();
 		}
@@ -671,15 +722,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			else
 			{
 				ArrayList<String> output = Functions.infiniteQueue(parameters, ((JComboBox)p_infiniteQueue.getComponent(2)).getSelectedIndex());
-				infiniteQueueOutputPanel.removeAll();
-				((GridLayout)infiniteQueueOutputPanel.getLayout()).setRows(output.size());
-				for(int i = 0; i < output.size(); i++)
-				{
-					JLabel jL = new JLabel();
-					jL.setFont(new Font("Arial", Font.PLAIN, 12));
-					jL.setText(" " + output.get(i));
-					infiniteQueueOutputPanel.add(jL);
-				}
+				((JTextArea)((JViewport)infiniteQueueOutputPane.getComponent(0)).getView()).setEditable(false);
+				((JTextArea)((JViewport)infiniteQueueOutputPane.getComponent(0)).getView()).setText(output.get(0) + "\n");
+				for(int i = 1; i < output.size(); i++)
+					((JTextArea)((JViewport)infiniteQueueOutputPane.getComponent(0)).getView()).append(output.get(i) + "\n");
 				
 				revalidate();
 				repaint();
@@ -692,11 +738,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			((JComboBox)p_infiniteQueue.getComponent(2)).setSelectedIndex(0);
 			((JTextField)p_infiniteQueue.getComponent(3)).setText("");
 			
-			finiteQueueOutputPanel.removeAll();
-			revalidate();
-			repaint();	
-			
-			infiniteQueueOutputPanel.removeAll();
+			((JTextArea)((JViewport)infiniteQueueOutputPane.getComponent(0)).getView()).setText("");
 			revalidate();
 			repaint();		
 		}
@@ -725,15 +767,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			else
 			{
 				ArrayList<String> output = Functions.finiteQueue(parameters, ((JComboBox)p_finiteQueue.getComponent(2)).getSelectedIndex());
-				finiteQueueOutputPanel.removeAll();
-				((GridLayout)finiteQueueOutputPanel.getLayout()).setRows(output.size());
-				for(int i = 0; i < output.size(); i++)
-				{
-					JLabel jL = new JLabel();
-					jL.setFont(new Font("Arial", Font.PLAIN, 12));
-					jL.setText(" " + output.get(i));
-					finiteQueueOutputPanel.add(jL);
-				}
+				((JTextArea)((JViewport)finiteQueueOutputPane.getComponent(0)).getView()).setEditable(false);
+				((JTextArea)((JViewport)finiteQueueOutputPane.getComponent(0)).getView()).setText(output.get(0) + "\n");
+				for(int i = 1; i < output.size(); i++)
+					((JTextArea)((JViewport)finiteQueueOutputPane.getComponent(0)).getView()).append(output.get(i) + "\n");
 				
 				revalidate();
 				repaint();
@@ -744,10 +781,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		{
 			((JTextField)p_finiteQueue.getComponent(1)).setText("");
 			((JComboBox)p_finiteQueue.getComponent(2)).setSelectedIndex(0);
-			((JTextField)p_infiniteQueue.getComponent(3)).setText("");
+			((JTextField)p_finiteQueue.getComponent(3)).setText("");
 			((JTextField)p_finiteQueue.getComponent(5)).setText("");
 			
-			finiteQueueOutputPanel.removeAll();
+			((JTextArea)((JViewport)finiteQueueOutputPane.getComponent(0)).getView()).setText("");
 			revalidate();
 			repaint();		
 		}
@@ -779,15 +816,10 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			else
 			{
 				ArrayList<String> output = Functions.closedSystem(parameters);
-				closedSystemOutputPanel.removeAll();
-				((GridLayout)closedSystemOutputPanel.getLayout()).setRows(output.size());
-				for(int i = 0; i < output.size(); i++)
-				{
-					JLabel jL = new JLabel();
-					jL.setFont(new Font("Arial", Font.PLAIN, 12));
-					jL.setText(" " + output.get(i));
-					closedSystemOutputPanel.add(jL);
-				}
+				((JTextArea)((JViewport)closedSystemOutputPane.getComponent(0)).getView()).setEditable(false);
+				((JTextArea)((JViewport)closedSystemOutputPane.getComponent(0)).getView()).setText(output.get(0) + "\n");
+				for(int i = 1; i < output.size(); i++)
+					((JTextArea)((JViewport)closedSystemOutputPane.getComponent(0)).getView()).append(output.get(i) + "\n");
 				
 				revalidate();
 				repaint();
@@ -796,13 +828,62 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		}
 		else if(e.getSource() == closedSystemClearButton)
 		{
-			((JComboBox)p_closedSystem.getComponent(1)).setSelectedIndex(0);
+			((JTextField)p_closedSystem.getComponent(1)).setText("");
 			((JTextField)p_closedSystem.getComponent(3)).setText("");
-			((JTextField)p_closedSystem.getComponent(5)).setText("");
 			
-			closedSystemOutputPanel.removeAll();
+			((JTextArea)((JViewport)closedSystemOutputPane.getComponent(0)).getView()).setText("");
 			revalidate();
-			repaint();		
+			repaint();
+		}
+		else if(e.getSource() == generalSystemCalculateButton)
+		{
+			ArrayList<Object> parameters = new ArrayList<Object>();
+			
+			boolean allValid = true;
+			ScriptEngineManager mgr = new ScriptEngineManager();
+			ScriptEngine engine = mgr.getEngineByName("JavaScript");
+			for(int i = 0; i < 1; i++)
+			{
+				try { parameters.add(Double.parseDouble(((JTextField)p_generalSystem.getComponent(i*2 + 1)).getText().trim())); }
+				catch (Exception exception)
+				{
+					try
+					{
+						double val = (double)engine.eval(((JTextField)p_generalSystem.getComponent(i*2 + 1)).getText());
+						parameters.add(val);
+					}
+					catch(ScriptException sException) { allValid = false; }
+				}
+			}
+			
+			parameters.add(((JTextField)p_generalSystem.getComponent(3)).getText().trim());
+			parameters.add(((JTextField)p_generalSystem.getComponent(5)).getText().trim());
+			
+			if(!allValid)
+				JOptionPane.showMessageDialog(this, commonStrings[ERROR_NUMERIC]);
+			else
+			{
+				ArrayList<String> output = Functions.generalSystem(parameters);
+				
+				((JTextArea)((JViewport)generalSystemOutputPane.getComponent(0)).getView()).setEditable(false);
+				((JTextArea)((JViewport)generalSystemOutputPane.getComponent(0)).getView()).setText(output.get(0) + "\n");
+				for(int i = 1; i < output.size(); i++)
+					((JTextArea)((JViewport)generalSystemOutputPane.getComponent(0)).getView()).append(output.get(i) + "\n");
+				
+				revalidate();
+				repaint();
+				generalSystemOutputPane.getVerticalScrollBar().setValue(generalSystemOutputPane.getVerticalScrollBar().getMaximum());
+			}			
+		}
+		else if(e.getSource() == generalSystemClearButton)
+		{
+			((JTextField)p_generalSystem.getComponent(1)).setText("");
+			((JTextField)p_generalSystem.getComponent(3)).setText("");
+			((JTextField)p_generalSystem.getComponent(5)).setText("");
+			
+			((JTextArea)((JViewport)generalSystemOutputPane.getComponent(0)).getView()).setText("");
+			revalidate();
+			repaint();
 		}
 		else if(e.getSource() == comboBoxes.get(0))
 		{
@@ -909,7 +990,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		
 		for(int i = 0; i < jC.getComponentCount(); i++)
 		{
-			if((jC instanceof JPanel) || (jC instanceof JTabbedPane) || (jC instanceof JScrollPane))
+			if((jC instanceof JPanel) || (jC instanceof JTabbedPane) || (jC instanceof JScrollPane) || (jC instanceof JTextArea) || (jC instanceof JViewport))
 				((JComponent)jC.getComponent(i)).addKeyListener(this);
 			else
 				break;
