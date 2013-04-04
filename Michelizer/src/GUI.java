@@ -166,8 +166,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	String[] queueLabelStrings	= { "Jobs per Second (\u03BB)",
 									"S0", "\u00B5", "w"						};
 	
-	String[] closedSystemStrings = { "Waiting Areas (m)", "Job Rate (z)",
-									 "S0", "\u00B5"							};
+	String[] closedSystemStrings = { "Process Time(s)", "Job Rate (z)" };
 	
 	GUI()
 	{
@@ -324,16 +323,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	
 	public void createPane6()
 	{
-		JComboBox jCB = new JComboBox();
-		jCB.addItem(closedSystemStrings[2]);
-		jCB.addItem(closedSystemStrings[3]);
-		
-		jCB.setSelectedIndex(1);
-		
-		p_closedSystem.add(jCB);
-		p_closedSystem.add(new JTextField());
-
-		for(int i = 0; i < closedSystemStrings.length-2; i++)
+		for(int i = 0; i < closedSystemStrings.length; i++)
 		{
 			JLabel jL = new JLabel();
 			jL.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -353,7 +343,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		pane_closedSystem.add(closedSystemCalculateButton);
 		pane_closedSystem.add(closedSystemClearButton);
 		pane_closedSystem.add(closedSystemOutputPane);
-		closedSystemOutputPane.setPreferredSize(new Dimension(285, 150));
+		closedSystemOutputPane.setPreferredSize(new Dimension(285, 175));
 	}
 	
 	public void createInfiniteQueuePane()
@@ -763,11 +753,14 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		}
 		else if(e.getSource() == closedSystemCalculateButton)
 		{
-			ArrayList<Double> parameters = new ArrayList<Double>();
+			ArrayList<Object> parameters = new ArrayList<Object>();
+			parameters.add(((JTextField)p_closedSystem.getComponent(1)).getText().trim());
+			
+			
 			boolean allValid = true;
 			ScriptEngineManager mgr = new ScriptEngineManager();
 			ScriptEngine engine = mgr.getEngineByName("JavaScript");
-			for(int i = 0; i < p_closedSystem.getComponentCount()/2; i++)
+			for(int i = 1; i < p_closedSystem.getComponentCount()/2; i++)
 			{
 				try { parameters.add(Double.parseDouble(((JTextField)p_closedSystem.getComponent(i*2 + 1)).getText().trim())); }
 				catch (Exception exception)
@@ -785,7 +778,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 				JOptionPane.showMessageDialog(this, commonStrings[ERROR_NUMERIC]);
 			else
 			{
-				ArrayList<String> output = Functions.closedSystem(parameters, ((JComboBox)p_closedSystem.getComponent(1)).getSelectedIndex());
+				ArrayList<String> output = Functions.closedSystem(parameters);
 				closedSystemOutputPanel.removeAll();
 				((GridLayout)closedSystemOutputPanel.getLayout()).setRows(output.size());
 				for(int i = 0; i < output.size(); i++)
