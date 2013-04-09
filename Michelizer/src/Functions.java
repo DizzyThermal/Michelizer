@@ -60,14 +60,14 @@ public class Functions
 															"Jobs in System on Average (N)", 
 															"Throughput (X)", "Service Response Time (R)", "S0"	};
 
-	public static String[] closedSystemOutputStrings	= {	"Job Rate (z)", "Process Time", "\u03BB",
+	public static String[] closedSystemOutputStrings	= {	"Job Rate (z jobs/second)", "Process Time (seconds/job)", "\u03BB",
 															"\u03BC", "P", "Utilization (u)", "Average Length of Queue (N)",
-															"Throughput (X)", "Response Time (R)" 				};
+															"Throughput (X seconds)", "Response Time (R seconds)" 				};
 	
 	public static String[] generalSystemOutputStrings	= {	"Number of Terms (k)", "\u03BB",
-															"\u00B5", "P", "Utilization (u)",
-															"Average Length of Queue (N)", "Throughput (X)",
-															"Response Time (R)" 								};
+															"\u00B5", "P", "P0=1/{1+sum[Prod(\u03BB(i-1)/µi, i=1..i=k)]}\nPk=P(k-1) * \u03BB(k-1)/µk\nUtilization (u)=1-P0\nUtilization (u)",
+															"N=SUM[i*Pi, i=1..i=k]\nAverage Length of Queue (N)", "X=SUM[µi*Pi, i=1..i=k]\nThroughput (X)",
+															"R=N/X\nResponse Time (R)" 								};
 	
 	public static ArrayList<String> serviceDemand(ArrayList<Double> parameters)
 	{
