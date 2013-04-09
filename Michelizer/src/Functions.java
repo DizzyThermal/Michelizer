@@ -706,10 +706,10 @@ public class Functions
 		ArrayList<Double> mus = new ArrayList<Double>();
 
 		for(int i = 0; i < iLams.length; i++)
-		{
 			lambdas.add(Double.parseDouble(iLams[i].trim()));
+		for(int i = 0; i < iMus.length; i++)
 			mus.add(Double.parseDouble(iMus[i].trim()));
-		}
+		
 		double k = (Double)parameters.get(gsK);
 		
 		while(lambdas.size() != k)
@@ -724,7 +724,7 @@ public class Functions
 		double sum = 1 + coefficients.get(0);
 		for(int i = 1; i < k-1; i++)
 		{
-			coefficients.add(coefficients.get(i-1)* (lambdas.get(i)/mus.get(i)));
+			coefficients.add(coefficients.get(i-1) * (lambdas.get(i)/mus.get(i)));
 			sum += coefficients.get(i);
 		}
 		
