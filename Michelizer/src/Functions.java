@@ -713,9 +713,9 @@ public class Functions
 		double k = (Double)parameters.get(gsK);
 		
 		while(lambdas.size() != k)
-			lambdas.add(lambdas.get(0));
+			lambdas.add(lambdas.get(lambdas.size()-1));
 		while(mus.size() != k)
-			mus.add(mus.get(0));		
+			mus.add(mus.get(mus.size()-1));		
 
 		ArrayList<Double> coefficients = new ArrayList<Double>();
 		ArrayList<Double> pks = new ArrayList<Double>();
