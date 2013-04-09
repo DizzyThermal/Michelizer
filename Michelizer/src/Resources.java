@@ -1,5 +1,7 @@
 public class Resources
 {
+	public static final String VERSION					= "v1.7.1";
+	
 	public static final int QUEUES 						= 0;
 	public static final int SERVICE_DEMAND				= 1;
 	public static final int SYSTEMS						= 2;
