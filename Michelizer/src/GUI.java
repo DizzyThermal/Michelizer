@@ -155,6 +155,9 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	// General System Output
 	JScrollPane generalSystemOutputPane = new JScrollPane(new JTextArea());
 	
+	// Help Panel
+	JScrollPane helpPane = new JScrollPane(new JTextArea());
+	
 	// Clustering Fields
 	ArrayList<JComboBox<String>> comboBoxes = new ArrayList<JComboBox<String>>();
 	ArrayList<JSpinner> spinners = new ArrayList<JSpinner>();
@@ -185,7 +188,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	
 	GUI()
 	{
-		super("Michelizer - The All-In-One ECE 460 Solver");
+		super("Michelizer (" + Functions.VERSION + ") - The All-In-One ECE 460 Solver");
 		FlowLayout fl = new FlowLayout();
 		fl.setAlignment(FlowLayout.LEFT);
 		setLayout(fl);
@@ -205,8 +208,17 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		jTP.addTab("Disk Access Time", pane_diskAccessTime);
 		jTP.addTab("Clustering", pane_clustering);
 		add(jTP);
-		jTP.setSelectedIndex(5);
+		jTP.setSelectedIndex(1);
+		jTP.addChangeListener(this);
+		jTPQueue.addChangeListener(this);
+		jTPSystems.addChangeListener(this);
 		recursivelyAddKeyListener((JComponent)((JComponent)((JComponent)this.getComponent(0)).getComponent(1)).getComponent(0));
+		
+		helpPane.setPreferredSize(new Dimension(475, 480));
+		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setEditable(false);
+		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setLineWrap(true);
+		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setText(Resources.HELP_SERVICE_DEMAND);
+		add(helpPane);
 	}
 	
 	public void createPane1()
@@ -564,7 +576,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			dimensionCount = (Integer)spinners.get(0).getValue();
 			updateScrollPane(getGUIPointCount(oldDim), dimensionCount, getDimensionsFromPoints(getPointsFromGUI(oldDim)));
 		}
-		else if(e.getSource() == comboBoxes.get(0))
+		if(e.getSource() == comboBoxes.get(0))
 		{
 			switch(comboBoxes.get(0).getSelectedIndex())
 			{
@@ -577,6 +589,48 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 					spinners.get(1).setEnabled(true);
 					break;
 			}
+		}
+		
+		// Tabs
+		JTextArea help = ((JTextArea)((JViewport)helpPane.getComponent(0)).getView());
+		if(e.getSource() == jTP)
+		{
+			if(jTP.getSelectedIndex() == Resources.SERVICE_DEMAND)
+				help.setText(Resources.HELP_SERVICE_DEMAND);
+			else if(jTP.getSelectedIndex() == Resources.CLUSTERING)
+				help.setText(Resources.HELP_CLUSTERING);
+			else if(jTP.getSelectedIndex() == Resources.DISK_ACCESS_TIME)
+				help.setText(Resources.HELP_DISK_ACCESS_TIME);
+			else if(jTP.getSelectedIndex() == Resources.POISSON)
+				help.setText(Resources.HELP_POISSON);
+			else if(jTP.getSelectedIndex() == Resources.QUEUES)
+			{
+				if(jTPQueue.getSelectedIndex() == Resources.INFINITE_QUEUES)
+					help.setText(Resources.HELP_INFINITE_QUEUES);
+				else
+					help.setText(Resources.HELP_FINITE_QUEUES);
+			}
+			else if(jTP.getSelectedIndex() == Resources.SYSTEMS)
+			{
+				if(jTPSystems.getSelectedIndex() == Resources.CLOSED_SYSTEM)
+					help.setText(Resources.HELP_CLOSED_SYSTEM);
+				else
+					help.setText(Resources.HELP_GENERAL_SYSTEM);
+			}
+		}
+		if(e.getSource() == jTPQueue)
+		{
+			if(jTPQueue.getSelectedIndex() == Resources.INFINITE_QUEUES)
+				help.setText(Resources.HELP_INFINITE_QUEUES);
+			else
+				help.setText(Resources.HELP_FINITE_QUEUES);
+		}
+		if (e.getSource() == jTPSystems)
+		{
+			if(jTPSystems.getSelectedIndex() == Resources.CLOSED_SYSTEM)
+				help.setText(Resources.HELP_CLOSED_SYSTEM);
+			else
+				help.setText(Resources.HELP_GENERAL_SYSTEM);
 		}
 	}
 

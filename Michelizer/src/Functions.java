@@ -10,6 +10,8 @@ import javax.swing.JFrame;
 public class Functions
 {
 	// Static Variables
+	public static final String VERSION			= "v1.7.0";
+	
 	public static final int MANHATTEN			= 0;
 	public static final int EUCLIDEAN			= 1;
 	
