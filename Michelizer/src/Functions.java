@@ -512,7 +512,7 @@ public class Functions
 		{
 			int start = Integer.parseInt(k.split("\\.\\.")[0]);
 			int end = Integer.parseInt(k.split("\\.\\.")[1]);
-
+			String outputP="Probability = \n";
 			// Swap values if Range is backwards (E.g. 4..0)
 			if(start > end)
 			{
@@ -523,9 +523,12 @@ public class Functions
 
 			double sum = 0.0;
 			for(int i = start; i <= end; i++)
+			{
 				sum += (Math.exp(-lambda*time)*Math.pow(lambda*time, i)) / factorial(i);
-			
-			return "Probability: " + round(sum);
+				outputP+="e^(-\u03BB*t)*(\u03BB*t)^"+i+"+\n";
+			}
+			outputP=outputP.substring(0,outputP.length()-2);
+			return outputP+"\n= " + round(sum);
 		}
 		else
 			return "Probability: " + round((Math.exp(-lambda*time)*Math.pow(lambda*time, Integer.parseInt(k))) / factorial(Integer.parseInt(k)));
