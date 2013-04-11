@@ -18,7 +18,7 @@ public class Resources
 	public static final String HELP_SERVICE_DEMAND		= "SD";
 	public static final String HELP_CLUSTERING			= "C";
 	public static final String HELP_DISK_ACCESS_TIME 	= "DAT";
-	public static final String HELP_POISSON 			= "P";
+	public static final String HELP_POISSON 			= "e^(-\u03BB*t)*(\u03BB*t)^k";
 	public static final String HELP_INFINITE_QUEUES 	= "Infinite Queues\n\nEquations\nP0 = 1 - (\u03BB/\u03BC)\nU = 1 - P0\nPk = P0 * (\u03BB/\u03BC)^k\n\u00D1 = (u)/(1-u)\nX = \u03BB\nR = N/X  --OR--  R = (1)/(\u03BC(1-u))\n";
 	public static final String HELP_FINITE_QUEUES 		= "Finite Queues\nP0 = ((1-\u03BB/\u03BC)/(1-((\u03BB/\u03BC)^w+1))\nP(k-1) = P0*((\u03BB/\u03BC)^k)\nU = 1 - P0\nN = SUM(k*P0*((\u03BB/\u03BC)^k) k =0...w\nX = U*\u03BC\nR = N/X";
 	public static final String HELP_CLOSED_SYSTEM 		= "Closed systems can be used to calculate a queue size\n\nProcess Time(s) is the same as Service rate (\u03BC), it\'s in seconds and is the rate at\nwhich people/jobs are leaving the system.\nJob Rate (z) is the same as arival rate (\u03BB), it\'sin seconds and is simply the\namount of people/jobs are comming into the system per second.\n\n\nPLEASE HELP WITH THIS HELP PAGE. ANYTHING YOU CAN THINK OF THAT MAY\nHELP WOULD BE APPRICIATED";
