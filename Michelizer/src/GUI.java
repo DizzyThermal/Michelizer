@@ -176,7 +176,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"					};
 	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"					};
 
-	String[] poissonLabelStrings 	= {	"\u03BB", "K*", "t" };
+	String[] poissonLabelStrings 	= {	"Rate (\u03BB)", "No. of Events (K)", "Time (t)" };
 
 	String[] queueLabelStrings	= { "Jobs per Second (\u03BB)",
 									"S0", "\u00B5", "w"									};
