@@ -15,8 +15,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.script.ScriptEngine;
@@ -57,6 +61,8 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	private static final int DISK_DATA_ERROR	= 1;
 	private static final int DISK_RANDOM_ERROR	= 2;
 	
+	private static boolean nCEnabled = false;
+	
 	// Message Strings
 	String[] commonStrings = {	"Computation Completed Successfully!",
 								"Error: All Values MUST be Numeric!",
@@ -90,7 +96,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	JPanel p_serviceDemand = new JPanel(new GridLayout(9,1));
 	JPanel p_diskAccessTime = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	JPanel p_clustering = new JPanel(new GridLayout(4,1));
-	JPanel p_poisson = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	JPanel p_poisson = new JPanel(new GridLayout(4,1));
 	JPanel p_queue = new JPanel(new GridLayout(9,1));
 	JPanel p_systems = new JPanel(new GridLayout(4,1));
 	
@@ -176,7 +182,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	String[] clusteringAlgorithmStrings	= {	"MST", "K-Means", "Z-Score"					};
 	String[] clusteringDistanceStrings	= {	"Manhatten", "Euclidean"					};
 
-	String[] poissonLabelStrings 	= {	"Rate (\u03BB)", "No. of Events (K)", "Time (t)" };
+	String[] poissonLabelStrings 	= {	"Rate (\u03BB)", "Number of Events (K)", "Time (t)" };
 
 	String[] queueLabelStrings	= { "Jobs per Second (\u03BB)",
 									"S0", "\u00B5", "w"									};
@@ -214,11 +220,36 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		jTPSystems.addChangeListener(this);
 		recursivelyAddKeyListener((JComponent)((JComponent)((JComponent)this.getComponent(0)).getComponent(1)).getComponent(0));
 		
+		helpPane.setFont(new Font("Verdana", Font.PLAIN, 12));
 		helpPane.setPreferredSize(new Dimension(475, 480));
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setEditable(false);
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setLineWrap(true);
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setText(Resources.HELP_SERVICE_DEMAND);
 		add(helpPane);
+		
+		Thread t1 = (new Thread()
+		{
+			@Override
+			public void run()
+			{
+				JTextArea help = ((JTextArea)((JViewport)helpPane.getComponent(0)).getView());
+				while(true)
+				{
+					while(nCEnabled)
+					{
+						try { Thread.sleep(500); }
+						catch(Exception e) { e.printStackTrace(); }
+						
+						if(help.getText().equals(Resources.NC_1))
+							help.setText(Resources.NC_2);
+						else
+							help.setText(Resources.NC_1);
+					}
+					while(!nCEnabled);
+				}
+			}
+		});
+		t1.start();
 	}
 	
 	public void createPane1()
@@ -324,7 +355,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 			p_poisson.add(jTF);
 		}
 		
-		p_poisson.setPreferredSize(new Dimension(210, 100));
+		p_poisson.setPreferredSize(new Dimension(275, 100));
 		poissonCalculateButton.addActionListener(this);
 		poissonClearButton.addActionListener(this);
 		
@@ -595,12 +626,16 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		JTextArea help = ((JTextArea)((JViewport)helpPane.getComponent(0)).getView());
 		if(e.getSource() == jTP)
 		{
+			if(!(jTP.getSelectedIndex() == Resources.SERVICE_DEMAND))
+				nCEnabled = false;
+			
 			if(jTP.getSelectedIndex() == Resources.SERVICE_DEMAND)
 				help.setText(Resources.HELP_SERVICE_DEMAND);
 			else if(jTP.getSelectedIndex() == Resources.CLUSTERING)
 				help.setText(Resources.HELP_CLUSTERING);
 			else if(jTP.getSelectedIndex() == Resources.DISK_ACCESS_TIME)
-				help.setText(Resources.HELP_DISK_ACCESS_TIME);
+				nCEnabled = true;
+				//help.setText(Resources.HELP_DISK_ACCESS_TIME);
 			else if(jTP.getSelectedIndex() == Resources.POISSON)
 				help.setText(Resources.HELP_POISSON);
 			else if(jTP.getSelectedIndex() == Resources.QUEUES)
@@ -1065,4 +1100,20 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	public void keyTyped(KeyEvent e) {}
 	@Override
 	public void keyReleased(KeyEvent e) {}
+	
+	public void toggleNyanCat()
+	{
+		JTextArea help = ((JTextArea)((JViewport)helpPane.getComponent(0)).getView());
+		
+		while(nCEnabled)
+		{
+			try { Thread.sleep(500); }
+			catch(Exception e) { e.printStackTrace(); }
+			
+			if(help.getText().equals(Resources.NC_1))
+				help.setText(Resources.NC_2);
+			else
+				help.setText(Resources.NC_1);
+		}
+	}
 }
