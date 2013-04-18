@@ -194,7 +194,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 	
 	GUI()
 	{
-		super("Michelizer (" + Resources.VERSION + ") - The All-In-One ECE 460 Solver");
+		super("Michelizer (" + Resources.VERSION_NUMBER + " - " + Resources.VERSION_CODENAME + ") - The All-In-One ECE 460 Solver");
 		FlowLayout fl = new FlowLayout();
 		fl.setAlignment(FlowLayout.LEFT);
 		setLayout(fl);
