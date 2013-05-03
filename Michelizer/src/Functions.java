@@ -93,7 +93,7 @@ public class Functions
 		return output;
 	}
 	
-	public static double round(Double value)
+	public static double round(double value)
 	{
 		return Double.valueOf(new DecimalFormat("#.###").format(value));
 	}
@@ -158,7 +158,7 @@ public class Functions
             clusters.add(new Cluster(points.get(i), "C" + (i+1)));
         
         // MST Algorithm (Loop until number of clusters remaining equals desired number of clusters)
-        Double distance = 0.0;
+        double distance = 0.0;
 
         while (clusters.size() > numOfClusters)
         {

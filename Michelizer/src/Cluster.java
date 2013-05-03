@@ -34,17 +34,22 @@ public class Cluster
 	public int getNumberOfPoints()				{ return points.size();				}
 	
 	// Centoid
-	public ClusterPoint getCentoid()				{ return centoid;					}
+	public ClusterPoint getCentoid()
+	{
+		calculateCentoid();
+		return centoid;
+	}
+
 	public void calculateCentoid()
 	{
 		ClusterPoint centoid = new ClusterPoint();
 		for(int i = 0; i < points.get(0).getDimensionSize(); i++)
 		{
-			Double sum = 0.0;
+			double sum = 0.0;
 			for(ClusterPoint p : points)
 				sum += p.getValueAtDimension(i);
 
-			centoid.addDimension(sum/points.size());
+			centoid.addDimension(sum/(double)points.size());
 		}
 		this.centoid = centoid;
 	}

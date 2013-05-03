@@ -1,7 +1,7 @@
 public class Resources
 {
-	public static final String VERSION_NUMBER				= "v1.7.5";
-	public static final String VERSION_CODENAME			= "Antonio";
+	public static final String VERSION_NUMBER				= "v1.7.6";
+	public static final String VERSION_CODENAME			= "Buck";
 	
 	public static final int QUEUES 						= 0;
 	public static final int SERVICE_DEMAND				= 1;
