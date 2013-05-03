@@ -206,7 +206,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		createPane5();
 		createPane6();
 		
-		jTP.setPreferredSize(new Dimension(300, 480));
+		jTP.setPreferredSize(new Dimension(300, 490));
 		jTP.addTab("Queues", pane_queue);
 		jTP.addTab("Service Demand", pane_serviceDemand);
 		jTP.addTab("Systems", pane_systems);
@@ -221,7 +221,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		recursivelyAddKeyListener((JComponent)((JComponent)((JComponent)this.getComponent(0)).getComponent(1)).getComponent(0));
 		
 		helpPane.setFont(new Font("Verdana", Font.PLAIN, 12));
-		helpPane.setPreferredSize(new Dimension(475, 480));
+		helpPane.setPreferredSize(new Dimension(475, 490));
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setEditable(false);
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setLineWrap(true);
 		((JTextArea)((JViewport)helpPane.getComponent(0)).getView()).setText(Resources.HELP_SERVICE_DEMAND);
