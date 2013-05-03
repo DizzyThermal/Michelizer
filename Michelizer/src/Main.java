@@ -7,8 +7,8 @@ public class Main
 		GUI go = new GUI();
 
 		go.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		go.setSize(800, 515);
-		go.setResizable(false);
+		go.setSize(800, 525);
+		go.setResizable(true);
 		go.setVisible(true);
 	}
 }
