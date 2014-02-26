@@ -735,7 +735,7 @@ public class GUI extends JFrame implements ChangeListener, ActionListener, KeyLi
 		else if(e.getSource() == clusteringCalculateButton)
 		{
 			ArrayList<ClusterPoint> points = getPointsFromGUI(dimensionCount);
-			int distanceType = (((String)comboBoxes.get(0).getSelectedItem()).equals("Manhatten"))?Functions.MANHATTEN:Functions.EUCLIDEAN;
+			int distanceType = comboBoxes.get(1).getSelectedIndex();
 			int clusterCount = (Integer)spinners.get(1).getValue();
 
 			boolean result = false;
